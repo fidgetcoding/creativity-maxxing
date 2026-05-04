@@ -225,7 +225,7 @@ This is one of three repos in the stack:
 |------|-------------|
 | [`cli-maxxing`](https://github.com/fidgetcoding/cli-maxxing) | Foundation — Claude Code, shell aliases, dev tools, productivity MCPs (Morgen, Motion, n8n, Notion, Playwright, SwiftKit). |
 | **`creativity-maxxing`** | **This repo** — design skills, video prompt engines, transcription lab, Canva in terminal. |
-| [`task-maxxing`](https://github.com/fidgetcoding/task-maxxing) | Three-way task sync — Obsidian ↔ Notion ↔ Morgen (requires [`2ndBrain-mogging`](https://github.com/fidgetcoding/2ndBrain-mogging)). |
+| [`task-maxxing`](https://github.com/fidgetcoding/task-maxxing) | Two-way task sync — Obsidian ↔ Morgen (Notion dropped 2026-05-04) (requires [`2ndBrain-mogging`](https://github.com/fidgetcoding/2ndBrain-mogging)). |
 
 Install `cli-maxxing` first (it drops `claude` onto your `PATH`). After that, `creativity-maxxing` and `task-maxxing` can be installed in either order.
 
