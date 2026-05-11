@@ -38,7 +38,7 @@ fi
 SANDBOX="$TMPROOT/repo"
 mkdir -p "$SANDBOX"
 cp -R "$REPO_ROOT/install.sh" "$SANDBOX/install.sh"
-mkdir -p "$SANDBOX/design" "$SANDBOX/media" "$SANDBOX/copywriting"
+mkdir -p "$SANDBOX/design" "$SANDBOX/media" "$SANDBOX/copywriting" "$SANDBOX/claude-watch"
 
 CALL_LOG="$TMPROOT/calls.log"
 : > "$CALL_LOG"
@@ -58,7 +58,13 @@ cat > "$SANDBOX/copywriting/install.sh" <<SHIM
 echo "copywriting-shim: \$*" >> "$CALL_LOG"
 exit 0
 SHIM
-chmod +x "$SANDBOX/design/install.sh" "$SANDBOX/media/install.sh" "$SANDBOX/copywriting/install.sh"
+cat > "$SANDBOX/claude-watch/install.sh" <<SHIM
+#!/usr/bin/env bash
+echo "claude-watch-shim: \$*" >> "$CALL_LOG"
+exit 0
+SHIM
+chmod +x "$SANDBOX/design/install.sh" "$SANDBOX/media/install.sh" \
+  "$SANDBOX/copywriting/install.sh" "$SANDBOX/claude-watch/install.sh"
 
 FAKE_HOME="$TMPROOT/home"
 mkdir -p "$FAKE_HOME/.claude/skills"
@@ -102,6 +108,11 @@ if grep -q '^copywriting-shim:' "$CALL_LOG"; then
   _pass "root install.sh delegated to copywriting/install.sh"
 else
   _fail "root install.sh did not call copywriting/install.sh"
+fi
+if grep -q '^claude-watch-shim:' "$CALL_LOG"; then
+  _pass "root install.sh delegated to claude-watch/install.sh"
+else
+  _fail "root install.sh did not call claude-watch/install.sh"
 fi
 
 MARKER="$FAKE_HOME/.claude/.creativity-maxxing-installed"
@@ -187,6 +198,8 @@ assert_contains "$ROOT_INSTALL" "media/install.sh" \
   "root install.sh references media/install.sh"
 assert_contains "$ROOT_INSTALL" "copywriting/install.sh" \
   "root install.sh references copywriting/install.sh"
+assert_contains "$ROOT_INSTALL" "claude-watch/install.sh" \
+  "root install.sh references claude-watch/install.sh"
 assert_contains "$ROOT_INSTALL" ".creativity-maxxing-installed" \
   "root install.sh uses the canonical marker filename"
 

@@ -3,9 +3,9 @@ set -euo pipefail
 
 # =============================================================================
 # creativity-maxxing — uninstall
-# Removes every tool installed by the design + media + copywriting modules,
-# in reverse order. ffmpeg is prompted separately because it is frequently
-# system-shared.
+# Removes every tool installed by the design + media + copywriting +
+# claude-watch modules, in reverse order. ffmpeg is prompted separately
+# because it is frequently system-shared.
 # =============================================================================
 
 GREEN='\033[0;32m'
@@ -270,6 +270,44 @@ remove_copywriting_skill() {
 }
 
 # -----------------------------------------------------------------------------
+# Remove /claude-watch skill (the skill itself, not the model/library cache)
+# -----------------------------------------------------------------------------
+remove_claude_watch_skill() {
+    local SKILL_DIR="$HOME/.claude/skills/claude-watch"
+    if [ -d "$SKILL_DIR" ] || [ -L "$SKILL_DIR" ]; then
+        rm -rf "$SKILL_DIR"
+        removed_one "Removed /claude-watch skill"
+    else
+        skipped_one "/claude-watch skill not present"
+    fi
+}
+
+# -----------------------------------------------------------------------------
+# Remove claude-watch user state (.env + library cache + custom model dir).
+# Conservative — only removes paths claude-watch owns. The shared whisper
+# model at ~/.whisper/ggml-base.en.bin is left in place; it's removed only
+# if the user accepts the whisper-cpp removal prompt below.
+# -----------------------------------------------------------------------------
+remove_claude_watch_state() {
+    local CONFIG_DIR="$HOME/.config/claude-watch"
+    local LIB_DIR="$HOME/claude-watch/library"
+    local removed=0
+    if [ -d "$CONFIG_DIR" ]; then
+        rm -rf "$CONFIG_DIR"
+        removed=$((removed + 1))
+    fi
+    if [ -d "$LIB_DIR" ]; then
+        rm -rf "$LIB_DIR"
+        removed=$((removed + 1))
+    fi
+    if [ "$removed" -gt 0 ]; then
+        removed_one "Removed claude-watch config + library cache"
+    else
+        skipped_one "claude-watch config + library cache not present"
+    fi
+}
+
+# -----------------------------------------------------------------------------
 # ffmpeg — prompt before touching (system-shared)
 # -----------------------------------------------------------------------------
 remove_ffmpeg_prompt() {
@@ -323,6 +361,8 @@ main() {
     remove_whisper_cpp
     remove_whisper_mcp
     remove_copywriting_skill
+    remove_claude_watch_skill
+    remove_claude_watch_state
     remove_ffmpeg_prompt
     rm -f "$HOME/.claude/.creativity-maxxing-installed"
     print_summary
