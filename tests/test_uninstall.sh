@@ -45,6 +45,7 @@ REMOVE_FNS=(
   remove_ytdlp_cli
   remove_whisper_cpp
   remove_whisper_mcp
+  remove_copywriting_skill
   remove_ffmpeg_prompt
 )
 for fn in "${REMOVE_FNS[@]}"; do
@@ -110,7 +111,7 @@ for v in design-taste-frontend high-end-visual-design full-output-enforcement \
          01-cinematic 02-3d-cgi 03-cartoon 04-comic-to-video 05-fight-scenes \
          06-motion-design-ad 07-ecommerce-ad 08-anime-action 09-product-360 \
          10-music-video 11-social-hook 12-brand-story 13-fashion-lookbook \
-         14-food-beverage 15-real-estate; do
+         14-food-beverage 15-real-estate copywriting; do
   mkdir -p "$FAKE_HOME/.claude/skills/$v"
   touch "$FAKE_HOME/.claude/skills/$v/SKILL.md"
 done
@@ -207,6 +208,11 @@ if [[ ! -d "$FAKE_HOME/.claude/skills/remotion-best-practices" ]]; then
   _pass "remotion-best-practices skill dir removed"
 else
   _fail "remotion-best-practices skill dir still present"
+fi
+if [[ ! -d "$FAKE_HOME/.claude/skills/copywriting" ]]; then
+  _pass "copywriting skill dir removed"
+else
+  _fail "copywriting skill dir still present"
 fi
 
 # Playwright explicitly removed from the mocked MCP state.

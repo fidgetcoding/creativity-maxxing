@@ -38,7 +38,7 @@ fi
 SANDBOX="$TMPROOT/repo"
 mkdir -p "$SANDBOX"
 cp -R "$REPO_ROOT/install.sh" "$SANDBOX/install.sh"
-mkdir -p "$SANDBOX/design" "$SANDBOX/media"
+mkdir -p "$SANDBOX/design" "$SANDBOX/media" "$SANDBOX/copywriting"
 
 CALL_LOG="$TMPROOT/calls.log"
 : > "$CALL_LOG"
@@ -53,7 +53,12 @@ cat > "$SANDBOX/media/install.sh" <<SHIM
 echo "media-shim: \$*" >> "$CALL_LOG"
 exit 0
 SHIM
-chmod +x "$SANDBOX/design/install.sh" "$SANDBOX/media/install.sh"
+cat > "$SANDBOX/copywriting/install.sh" <<SHIM
+#!/usr/bin/env bash
+echo "copywriting-shim: \$*" >> "$CALL_LOG"
+exit 0
+SHIM
+chmod +x "$SANDBOX/design/install.sh" "$SANDBOX/media/install.sh" "$SANDBOX/copywriting/install.sh"
 
 FAKE_HOME="$TMPROOT/home"
 mkdir -p "$FAKE_HOME/.claude/skills"
@@ -92,6 +97,11 @@ if grep -q '^media-shim:' "$CALL_LOG"; then
   _pass "root install.sh delegated to media/install.sh"
 else
   _fail "root install.sh did not call media/install.sh"
+fi
+if grep -q '^copywriting-shim:' "$CALL_LOG"; then
+  _pass "root install.sh delegated to copywriting/install.sh"
+else
+  _fail "root install.sh did not call copywriting/install.sh"
 fi
 
 MARKER="$FAKE_HOME/.claude/.creativity-maxxing-installed"
@@ -175,6 +185,8 @@ assert_contains "$ROOT_INSTALL" "design/install.sh" \
   "root install.sh references design/install.sh"
 assert_contains "$ROOT_INSTALL" "media/install.sh" \
   "root install.sh references media/install.sh"
+assert_contains "$ROOT_INSTALL" "copywriting/install.sh" \
+  "root install.sh references copywriting/install.sh"
 assert_contains "$ROOT_INSTALL" ".creativity-maxxing-installed" \
   "root install.sh uses the canonical marker filename"
 
