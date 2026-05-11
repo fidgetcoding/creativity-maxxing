@@ -7,7 +7,7 @@
 # creativity-maxxing
 
 **Turn Claude Code + your terminal into a creative studio — 
-design, video, audio, transcription in one install.**
+design, video, audio, transcription, copywriting in one install.**
 
 [![License: MIT](https://img.shields.io/badge/License-MIT-blue.svg)](https://opensource.org/licenses/MIT)
 
@@ -46,6 +46,7 @@ design, video, audio, transcription in one install.**
 - **Remotion** so Claude writes React-native video compositions instead of re-inventing timing code every time.
 - **A full transcription stack** — drop any YouTube / Instagram / TikTok link and get the transcript back, locally, no API key.
 - **Higgsfield / Seedance 2.0 prompt skills** — 15 video-style prompt engineers pre-wired for Claude.
+- **`/copywriting`** — a master-trained anti-AI-slop copy filter. Bernbach, Hegarty, Abbott, Trott, Wieden, Sugarman, Sackheim, Schwartz, Bencivenga, Gossage, Krone, McElligott. Auto-activates on headlines, hero copy, body copy, CTAs, manifestos, proposal docs, landing pages, ad copy, brand voice work, naming, and "rewrite this paragraph."
 
 It's built for Claude Code in the terminal, not the desktop app.
 
@@ -88,7 +89,7 @@ Want Gamma too? It's opt-in (it fails to connect without an API key from [gamma.
 bash <(curl -fsSL https://raw.githubusercontent.com/fidgetcoding/creativity-maxxing/main/install.sh) --with-gamma
 ```
 
-The installer runs `design/install.sh` then `media/install.sh` in order, refuses to start if `claude` or `~/.claude/skills/` is missing, and is idempotent — re-run any time without duplicating installs. Idempotency marker: `~/.claude/.creativity-maxxing-installed` (delete to force a full reinstall).
+The installer runs `design/install.sh`, then `media/install.sh`, then `copywriting/install.sh` in order, refuses to start if `claude` or `~/.claude/skills/` is missing, and is idempotent — re-run any time without duplicating installs. Idempotency marker: `~/.claude/.creativity-maxxing-installed` (delete to force a full reinstall).
 
 **Flags:**
 - `--with-gamma` — also register the Gamma MCP (default off, needs API key).
@@ -132,6 +133,7 @@ Everything else installs with zero accounts and zero keys.
 | Gamma | MCP server (opt-in via `--with-gamma`, needs API key) | Generate presentations, docs, and landing pages from a prompt. Pairs well with `UI/UX Pro Max` context. Default install skips it (no key = silent connect failure). |
 | Playwright MCP | MCP server | Microsoft's official browser automation — lets Claude log into and operate web apps with no API (Higgsfield, niche SaaS, anything you'd normally click through). |
 | Whisper `base.en` model | ~141MB binary at `~/.whisper/ggml-base.en.bin` | Auto-fetched from huggingface.co so transcription works on first call. Skip with `--no-whisper-model`. |
+| `/copywriting` skill | Claude skill | Master-trained anti-AI-slop copy filter (Bernbach, Hegarty, Abbott, Trott, Wieden, Sugarman, Sackheim, Schwartz, Bencivenga, Gossage, Krone, McElligott). 20 files — 1 SKILL.md + 19 references covering voice library, frameworks, headlines, body copy, CTAs, proposals, psych triggers, compression, humanization, proofreading, quality gates. |
 
 All targets are **idempotent** — the install script checks and skips if already present. Figma, Excalidraw (and Canva above) install as remote HTTP MCPs — the script registers them; first tool call opens your browser for a one-time OAuth. Gamma is opt-in (`--with-gamma`) and requires an API key from [gamma.app/api](https://gamma.app/api). Playwright installs as a local npx MCP — no credentials needed.
 
@@ -153,6 +155,10 @@ All targets are **idempotent** — the install script checks and skips if alread
 - **YouTube Transcript MCP** — drop a YT link, get the transcript. No credential needed.
 - **yt-dlp + Whisper stack** — this is the one I actually wanted most. Paste an IG Reel / TikTok / tweet link and Claude transcribes it locally using Whisper. No uploads, no paywall, no mangled timestamps. Works on anything `yt-dlp` can download (~1000 sites).
 - **ffmpeg** — the glue. Remotion needs it for rendering, yt-dlp uses it for postprocessing, Whisper uses it for audio conversion.
+
+### Copywriting
+
+- **`/copywriting`** — the anti-AI-slop filter for words, same shape as taste-skill is for UI. Trained on the 12 names every serious copywriter cites: Bill Bernbach, John Hegarty, David Abbott, Dave Trott, Dan Wieden, Joe Sugarman, Maxwell Sackheim, Eugene Schwartz, Gary Bencivenga, Howard Gossage, Helmut Krone, Tom McElligott. Auto-activates when I ask for a headline, hero, body copy, CTA, manifesto, proposal copy, landing page, ad copy, brand voice, naming, or "rewrite this paragraph." Picks a voice + framework, drafts hot, then compresses 40-60% and runs a quality gate that bans the obvious AI tells (`elevate`, `unlock`, `harness`, `leverage`, `journey`, `seamless`, `robust`, `delve`, "In today's…", "Imagine a…", and the rest). Suspended in regular chat by `/concise` from `cli-maxxing` — only takes over when the deliverable is going to a human audience.
 
 ---
 
@@ -213,7 +219,7 @@ Or, from a clone:
 bash uninstall.sh
 ```
 
-Removes, in reverse order: UI/UX Pro Max, all 8 taste variants, 21st.dev Magic MCP, Canva MCP, Figma MCP, Excalidraw MCP, Gamma MCP, Playwright MCP, Higgsfield/Seedance skills, Remotion skills, YouTube Transcript MCP, yt-dlp MCP, yt-dlp CLI, whisper-cpp, whisper-mcp, ffmpeg. **Prompts before removing `ffmpeg`** because ffmpeg is usually shared with non-creative tooling — answer `N` to keep it.
+Removes, in reverse order: UI/UX Pro Max, all 8 taste variants, 21st.dev Magic MCP, Canva MCP, Figma MCP, Excalidraw MCP, Gamma MCP, Playwright MCP, Higgsfield/Seedance skills, Remotion skills, YouTube Transcript MCP, yt-dlp MCP, yt-dlp CLI, whisper-cpp, whisper-mcp, `/copywriting` skill, ffmpeg. **Prompts before removing `ffmpeg`** because ffmpeg is usually shared with non-creative tooling — answer `N` to keep it.
 
 ---
 

@@ -22,6 +22,9 @@ echo "    Remotion skill · 15× Higgsfield/Seedance skills"
 echo "    YouTube Transcript MCP · yt-dlp (CLI + MCP)"
 echo "    whisper-cpp · whisper-mcp · FFmpeg"
 echo ""
+echo "  Copywriting module:"
+echo "    /copywriting skill — anti-AI-slop master-trained copy filter"
+echo ""
 
 _TMPDIR="$(mktemp -d)"
 trap 'rm -rf "$_TMPDIR"' EXIT
@@ -29,6 +32,7 @@ git clone --quiet --depth 1 https://github.com/fidgetcoding/creativity-maxxing.g
 
 bash "$_TMPDIR/design/install.sh"
 bash "$_TMPDIR/media/install.sh"
+bash "$_TMPDIR/copywriting/install.sh"
 
 echo ""
 echo -e "${GREEN}━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━${NC}"
