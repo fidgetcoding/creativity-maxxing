@@ -194,6 +194,41 @@ Under the hood: `yt-dlp` grabs the audio → `ffmpeg` converts it → `whisper-c
 
 ---
 
+## Copywriting
+
+The `/copywriting` skill auto-activates on any copy task — you don't have to call it by name. Talk to Claude naturally:
+
+```
+"Write me 5 headlines for a Bernbach-style print ad for an indie coffee roaster."
+"Draft hero copy for a fintech landing page — Trott voice, AIDA framework, problem-aware audience."
+"Rewrite this paragraph so it sounds human, not LLM."
+"Give me 3 CTAs for a free-trial signup — short, no hedge verbs."
+"Name a B2B analytics tool — Hegarty-style, one-word brand, zag where competitors zig."
+"Strip the AI-slop from this About page."
+"Write a 600-word proposal section in Bencivenga voice — value prop, proof, close."
+```
+
+What it does behind the scenes (per the SKILL.md flow):
+
+1. Diagnoses the awareness state (Schwartz's 5: Unaware → Most-Aware).
+2. Picks a voice from the master library (Bernbach, Hegarty, Abbott, Trott, Wieden, Sugarman, Sackheim, Schwartz, Bencivenga, Gossage, Krone, McElligott).
+3. Picks a framework (AIDA, PAS, BAB, 4Ps, FAB, AIDCA, Schwartz 5-stage, Slippery Slide, SCQA).
+4. Drafts hot.
+5. Compresses 40-60%.
+6. Humanizes — bans the LLM tells (`elevate`, `unlock`, `harness`, `leverage`, `journey` as metaphor, `seamless`, `robust`, `delve`, "In today's…", "Imagine a…").
+7. Runs a binary quality gate.
+
+Suspended automatically in regular chat by `/concise` (from `cli-maxxing`) — it only takes over when the deliverable is going to a human audience.
+
+**Reference files** (Claude pulls these on demand — you don't need to know their names):
+
+- `voice-library.md` + 5 `voices-*.md` cluster files (punch, restraint, honesty, DTC, challenger)
+- `frameworks.md` + 3 `frameworks-*.md` cluster files (attention, sales, awareness)
+- `headlines.md`, `body-copy.md`, `cta-patterns.md`, `proposal-patterns.md`
+- `psych-triggers.md`, `compression.md`, `humanization.md`, `proofreading.md`, `gates.md`
+
+---
+
 ## Workflow combos
 
 Common multi-tool patterns:
@@ -235,6 +270,7 @@ cbrain      # open the 2ndBrain vault context (requires 2ndBrain-mogging)
 | Design skills | `~/.claude/skills/ui-ux-pro-max/`, `~/.claude/skills/design-taste-frontend/`, …7 more taste variants |
 | Video prompt skills | `~/.claude/skills/01-cinematic/` … `~/.claude/skills/15-real-estate/` |
 | Remotion skill | `~/.claude/skills/remotion-best-practices/` |
+| Copywriting skill | `~/.claude/skills/copywriting/` (SKILL.md + 19 references) |
 | MCP registry | `claude mcp list` |
 | Install marker | `~/.claude/.creativity-maxxing-installed` |
 | yt-dlp CLI | `$(which yt-dlp)` (typically `/opt/homebrew/bin/yt-dlp`) |

@@ -3,14 +3,17 @@ set -euo pipefail
 
 # =============================================================================
 # creativity-maxxing — Root installer
-# Installs the design + media modules.
+# Installs the design + media + copywriting modules.
 #
-# Design module:  UI/UX Pro Max skill · 8× Taste Skills · 21st.dev Magic MCP
-#                 Canva MCP · Figma MCP · Excalidraw MCP · Playwright MCP
-#                 Gamma MCP (opt-in via --with-gamma)
-# Media module:   Remotion skill · 15× Higgsfield/Seedance skills
-#                 YouTube Transcript MCP · yt-dlp (CLI + MCP) · whisper-cpp
-#                 whisper-mcp · FFmpeg
+# Design module:       UI/UX Pro Max skill · 8× Taste Skills · 21st.dev Magic MCP
+#                      Canva MCP · Figma MCP · Excalidraw MCP · Playwright MCP
+#                      Gamma MCP (opt-in via --with-gamma)
+# Media module:        Remotion skill · 15× Higgsfield/Seedance skills
+#                      YouTube Transcript MCP · yt-dlp (CLI + MCP) · whisper-cpp
+#                      whisper-mcp · FFmpeg
+# Copywriting module:  /copywriting skill — master-trained anti-AI-slop filter
+#                      (Bernbach, Hegarty, Abbott, Trott, Wieden, Sugarman,
+#                      Sackheim, Schwartz, Bencivenga, Gossage, Krone, McElligott)
 # =============================================================================
 
 BLUE='\033[0;34m'
@@ -34,6 +37,9 @@ echo "  Media module:"
 echo "    Remotion skill · 15× Higgsfield/Seedance skills"
 echo "    YouTube Transcript MCP · yt-dlp (CLI + MCP)"
 echo "    whisper-cpp · whisper-mcp · FFmpeg"
+echo ""
+echo "  Copywriting module:"
+echo "    /copywriting skill — anti-AI-slop master-trained copy filter"
 echo ""
 echo -e "${BLUE}━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━${NC}"
 echo ""
@@ -60,6 +66,7 @@ fi
 
 bash "$HERE/design/install.sh" "$@"
 bash "$HERE/media/install.sh" "$@"
+bash "$HERE/copywriting/install.sh" "$@"
 touch "$MARKER"
 
 echo ""

@@ -3,8 +3,9 @@ set -euo pipefail
 
 # =============================================================================
 # creativity-maxxing — uninstall
-# Removes every tool installed by the design + media modules, in reverse order.
-# ffmpeg is prompted separately because it is frequently system-shared.
+# Removes every tool installed by the design + media + copywriting modules,
+# in reverse order. ffmpeg is prompted separately because it is frequently
+# system-shared.
 # =============================================================================
 
 GREEN='\033[0;32m'
@@ -256,6 +257,19 @@ remove_whisper_mcp() {
 }
 
 # -----------------------------------------------------------------------------
+# Remove /copywriting skill
+# -----------------------------------------------------------------------------
+remove_copywriting_skill() {
+    local SKILL_DIR="$HOME/.claude/skills/copywriting"
+    if [ -d "$SKILL_DIR" ] || [ -L "$SKILL_DIR" ]; then
+        rm -rf "$SKILL_DIR"
+        removed_one "Removed /copywriting skill"
+    else
+        skipped_one "/copywriting skill not present"
+    fi
+}
+
+# -----------------------------------------------------------------------------
 # ffmpeg — prompt before touching (system-shared)
 # -----------------------------------------------------------------------------
 remove_ffmpeg_prompt() {
@@ -308,6 +322,7 @@ main() {
     remove_ytdlp_cli
     remove_whisper_cpp
     remove_whisper_mcp
+    remove_copywriting_skill
     remove_ffmpeg_prompt
     rm -f "$HOME/.claude/.creativity-maxxing-installed"
     print_summary
