@@ -46,6 +46,8 @@ REMOVE_FNS=(
   remove_whisper_cpp
   remove_whisper_mcp
   remove_copywriting_skill
+  remove_claude_watch_skill
+  remove_claude_watch_state
   remove_ffmpeg_prompt
 )
 for fn in "${REMOVE_FNS[@]}"; do
@@ -111,10 +113,21 @@ for v in design-taste-frontend high-end-visual-design full-output-enforcement \
          01-cinematic 02-3d-cgi 03-cartoon 04-comic-to-video 05-fight-scenes \
          06-motion-design-ad 07-ecommerce-ad 08-anime-action 09-product-360 \
          10-music-video 11-social-hook 12-brand-story 13-fashion-lookbook \
-         14-food-beverage 15-real-estate copywriting; do
+         14-food-beverage 15-real-estate copywriting claude-watch; do
   mkdir -p "$FAKE_HOME/.claude/skills/$v"
   touch "$FAKE_HOME/.claude/skills/$v/SKILL.md"
 done
+
+# Seed claude-watch user state (config + library cache) so we can verify
+# remove_claude_watch_state nukes it without touching the shared ~/.whisper
+# model dir.
+mkdir -p "$FAKE_HOME/.config/claude-watch/models"
+touch "$FAKE_HOME/.config/claude-watch/.env"
+mkdir -p "$FAKE_HOME/claude-watch/library/sample-vid"
+touch "$FAKE_HOME/claude-watch/library/sample-vid/notes.md"
+# A bystander whisper model — must survive (it's the shared media-module path).
+mkdir -p "$FAKE_HOME/.whisper"
+touch "$FAKE_HOME/.whisper/ggml-base.en.bin"
 
 # Install marker.
 touch "$FAKE_HOME/.claude/.creativity-maxxing-installed"
@@ -213,6 +226,29 @@ if [[ ! -d "$FAKE_HOME/.claude/skills/copywriting" ]]; then
   _pass "copywriting skill dir removed"
 else
   _fail "copywriting skill dir still present"
+fi
+if [[ ! -d "$FAKE_HOME/.claude/skills/claude-watch" ]]; then
+  _pass "claude-watch skill dir removed"
+else
+  _fail "claude-watch skill dir still present"
+fi
+if [[ ! -d "$FAKE_HOME/.config/claude-watch" ]]; then
+  _pass "claude-watch config dir removed (~/.config/claude-watch)"
+else
+  _fail "claude-watch config dir still present"
+fi
+if [[ ! -d "$FAKE_HOME/claude-watch/library" ]]; then
+  _pass "claude-watch library cache removed (~/claude-watch/library)"
+else
+  _fail "claude-watch library cache still present"
+fi
+# Shared whisper model (created by media module) must NOT be touched by
+# remove_claude_watch_state — that's removed only via the ffmpeg-style
+# whisper-cpp brew uninstall path.
+if [[ -f "$FAKE_HOME/.whisper/ggml-base.en.bin" ]]; then
+  _pass "shared ~/.whisper/ggml-base.en.bin preserved (claude-watch state cleanup is scoped)"
+else
+  _fail "claude-watch state cleanup overreached and removed the shared whisper model"
 fi
 
 # Playwright explicitly removed from the mocked MCP state.

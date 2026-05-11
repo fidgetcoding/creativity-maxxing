@@ -194,6 +194,46 @@ Under the hood: `yt-dlp` grabs the audio → `ffmpeg` converts it → `whisper-c
 
 ---
 
+## Video study + channel sweep (`/claude-watch`)
+
+`/claude-watch` is transcription's bigger sibling. It downloads the video, picks scene-change frames with ffmpeg, lines them up against the transcript, then Claude reads every frame as an image and writes structured notes to `~/claude-watch/library/<slug>/notes.md`. Runs key-free off the local whisper.cpp stack the media module already installed.
+
+### Single video
+
+```
+/claude-watch https://youtu.be/<id>
+/claude-watch https://youtu.be/<id> hooks and script structure
+/claude-watch ~/Lectures/cs231n.mp4 backpropagation derivation
+/claude-watch https://youtu.be/<long> --start 5:00 --end 25:00
+/claude-watch <url> --resolution 1024            # slides with tiny code text
+```
+
+Output (per video): a `notes.md` with TLDR, Key Concepts (timestamped), one section per scene (screenshot + on-screen text + said + synthesis), Code & Commands (verbatim), Diagrams Referenced, Open Questions.
+
+### Channel / playlist sweep
+
+```
+/claude-watch https://www.youtube.com/@<handle>/videos
+/claude-watch https://www.youtube.com/@<handle>/videos --limit 20
+/claude-watch https://www.youtube.com/playlist?list=<id>
+```
+
+When the source is a multi-video URL (yt-dlp probe returns `_type: playlist` with >1 entries), the skill processes the first N (default 10, override with `--limit`) and writes a top-level `~/claude-watch/library/channel-<slug>-<hash>/index.md` with the video table and a Cross-channel synthesis section — what hooks repeat, what thumbnail formulas show up, what script structures appear, top 3 cloneable moves. Force single-video mode on ambiguous URLs with `--single`.
+
+### Transcript backends (auto-selected, in priority order)
+
+1. **Native captions** — `yt-dlp --write-subs` grabs YouTube/IG/TikTok captions. Free, no key, no whisper call.
+2. **Local whisper.cpp** — uses the `~/.whisper/ggml-base.en.bin` model the media module already dropped. No key, no network. Metal-accelerated on Apple Silicon.
+3. **Groq / OpenAI Whisper API** — only fires if `GROQ_API_KEY` or `OPENAI_API_KEY` is set in `~/.config/claude-watch/.env`. Optional.
+
+Force a backend: `--whisper local|groq|openai`. Disable Whisper entirely: `--no-whisper` (frames-only when captions are missing).
+
+### Library cache
+
+Re-running the same URL hits a slug-keyed cache — no re-download, no re-transcribe; only frames + notes regenerate. Force a fresh run by deleting the `meta.json` in the library dir.
+
+---
+
 ## Copywriting
 
 The `/copywriting` skill auto-activates on any copy task — you don't have to call it by name. Talk to Claude naturally:
@@ -271,6 +311,10 @@ cbrain      # open the 2ndBrain vault context (requires 2ndBrain-mogging)
 | Video prompt skills | `~/.claude/skills/01-cinematic/` … `~/.claude/skills/15-real-estate/` |
 | Remotion skill | `~/.claude/skills/remotion-best-practices/` |
 | Copywriting skill | `~/.claude/skills/copywriting/` (SKILL.md + 19 references) |
+| Claude-watch skill | `~/.claude/skills/claude-watch/` (SKILL.md + 11 scripts + hooks + slash command) |
+| Claude-watch config | `~/.config/claude-watch/.env` (mode 0600) — optional API keys |
+| Claude-watch library | `~/claude-watch/library/<slug>/` (notes.md + frames + transcript per video) |
+| Whisper model (shared) | `~/.whisper/ggml-base.en.bin` (~141MB, installed by media module, reused by /claude-watch) |
 | MCP registry | `claude mcp list` |
 | Install marker | `~/.claude/.creativity-maxxing-installed` |
 | yt-dlp CLI | `$(which yt-dlp)` (typically `/opt/homebrew/bin/yt-dlp`) |

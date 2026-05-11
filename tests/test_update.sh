@@ -38,6 +38,8 @@ assert_contains "$UPDATE_SH" "media/install.sh" \
   "update.sh re-runs media/install.sh"
 assert_contains "$UPDATE_SH" "copywriting/install.sh" \
   "update.sh re-runs copywriting/install.sh"
+assert_contains "$UPDATE_SH" "claude-watch/install.sh" \
+  "update.sh re-runs claude-watch/install.sh"
 assert_contains "$UPDATE_SH" 're:git clone.*--depth 1' \
   "update.sh shallow-clones (--depth 1) — no history bloat"
 
@@ -61,7 +63,7 @@ trap cleanup EXIT
 
 # Prepare the fake upstream — two shim installers that just record a call.
 UPSTREAM="$TMPROOT/upstream"
-mkdir -p "$UPSTREAM/design" "$UPSTREAM/media" "$UPSTREAM/copywriting"
+mkdir -p "$UPSTREAM/design" "$UPSTREAM/media" "$UPSTREAM/copywriting" "$UPSTREAM/claude-watch"
 CALL_LOG="$TMPROOT/calls.log"
 : > "$CALL_LOG"
 cat > "$UPSTREAM/design/install.sh" <<SHIM
@@ -79,7 +81,13 @@ cat > "$UPSTREAM/copywriting/install.sh" <<SHIM
 echo "copywriting-updated" >> "$CALL_LOG"
 exit 0
 SHIM
-chmod +x "$UPSTREAM/design/install.sh" "$UPSTREAM/media/install.sh" "$UPSTREAM/copywriting/install.sh"
+cat > "$UPSTREAM/claude-watch/install.sh" <<SHIM
+#!/usr/bin/env bash
+echo "claude-watch-updated" >> "$CALL_LOG"
+exit 0
+SHIM
+chmod +x "$UPSTREAM/design/install.sh" "$UPSTREAM/media/install.sh" \
+  "$UPSTREAM/copywriting/install.sh" "$UPSTREAM/claude-watch/install.sh"
 
 # Mock git — swallow the --depth 1 args, just `cp -R` the upstream sandbox
 # into the target dir so update.sh's subsequent `bash "$_TMPDIR/...` works.
@@ -127,6 +135,11 @@ if grep -q '^copywriting-updated' "$CALL_LOG"; then
   _pass "update.sh re-ran copywriting/install.sh"
 else
   _fail "update.sh did not re-run copywriting/install.sh"
+fi
+if grep -q '^claude-watch-updated' "$CALL_LOG"; then
+  _pass "update.sh re-ran claude-watch/install.sh"
+else
+  _fail "update.sh did not re-run claude-watch/install.sh"
 fi
 
 # Tempdir cleanup: update.sh's trap EXIT should have removed everything
