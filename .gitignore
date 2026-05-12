@@ -27,7 +27,7 @@ credentials.json
 # Node (defensive — install scripts may install deps)
 node_modules/
 
-# Python bytecode from vendored skill scripts (claude-watch-skill/, etc.)
+# Python bytecode from vendored skill scripts (watch-skill/, etc.)
 __pycache__/
 *.pyc
 *.pyo
