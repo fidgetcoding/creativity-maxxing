@@ -3,7 +3,7 @@ set -euo pipefail
 
 # =============================================================================
 # creativity-maxxing — Root installer
-# Installs the design + media + copywriting + claude-watch modules.
+# Installs the design + media + copywriting + watch modules.
 #
 # Design module:       UI/UX Pro Max skill · 8× Taste Skills · 21st.dev Magic MCP
 #                      Canva MCP · Figma MCP · Excalidraw MCP · Playwright MCP
@@ -14,7 +14,7 @@ set -euo pipefail
 # Copywriting module:  /copywriting skill — master-trained anti-AI-slop filter
 #                      (Bernbach, Hegarty, Abbott, Trott, Wieden, Sugarman,
 #                      Sackheim, Schwartz, Bencivenga, Gossage, Krone, McElligott)
-# Claude-Watch module: /claude-watch skill — drop any video/channel/playlist
+# Claude-Watch module: /watch skill — drop any video/channel/playlist
 #                      URL and get back timestamped, frame-aware study notes.
 #                      Uses the media-module's local whisper.cpp + yt-dlp stack
 #                      so it runs key-free + offline.
@@ -46,7 +46,7 @@ echo "  Copywriting module:"
 echo "    /copywriting skill — anti-AI-slop master-trained copy filter"
 echo ""
 echo "  Claude-Watch module:"
-echo "    /claude-watch skill — frame-aware video → structured study notes"
+echo "    /watch skill — frame-aware video → structured study notes"
 echo "                          (single video, full channel, or playlist)"
 echo ""
 echo -e "${BLUE}━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━${NC}"
@@ -75,7 +75,7 @@ fi
 bash "$HERE/design/install.sh" "$@"
 bash "$HERE/media/install.sh" "$@"
 bash "$HERE/copywriting/install.sh" "$@"
-bash "$HERE/claude-watch/install.sh" "$@"
+bash "$HERE/watch/install.sh" "$@"
 touch "$MARKER"
 
 echo ""

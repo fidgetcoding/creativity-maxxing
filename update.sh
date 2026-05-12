@@ -26,7 +26,7 @@ echo "  Copywriting module:"
 echo "    /copywriting skill — anti-AI-slop master-trained copy filter"
 echo ""
 echo "  Claude-Watch module:"
-echo "    /claude-watch skill — video / channel / playlist → study notes"
+echo "    /watch skill — video / channel / playlist → study notes"
 echo ""
 
 _TMPDIR="$(mktemp -d)"
@@ -36,7 +36,7 @@ git clone --quiet --depth 1 https://github.com/fidgetcoding/creativity-maxxing.g
 bash "$_TMPDIR/design/install.sh"
 bash "$_TMPDIR/media/install.sh"
 bash "$_TMPDIR/copywriting/install.sh"
-bash "$_TMPDIR/claude-watch/install.sh"
+bash "$_TMPDIR/watch/install.sh"
 
 echo ""
 echo -e "${GREEN}━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━${NC}"

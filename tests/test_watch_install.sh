@@ -1,12 +1,12 @@
 #!/usr/bin/env bash
-# tests/test_claude_watch_install.sh
-# Static + behavioral coverage for claude-watch/install.sh.
+# tests/test_watch_install.sh
+# Static + behavioral coverage for watch/install.sh.
 #
-# The claude-watch module installs a single skill at ~/.claude/skills/claude-watch
-# composed of SKILL.md + scripts/ (11 .py files) + commands/claude-watch.md +
+# The watch module installs a single skill at ~/.claude/skills/watch
+# composed of SKILL.md + scripts/ (11 .py files) + commands/watch.md +
 # hooks/ (hooks.json + scripts/session_start.sh). The installer pulls each
 # file from raw.githubusercontent.com/fidgetcoding/creativity-maxxing/main/
-# claude-watch-skill/ with a local fallback. This test asserts the static
+# watch-skill/ with a local fallback. This test asserts the static
 # contract + runs a behavioral probe that forces the local fallback path so
 # it works offline.
 
@@ -16,11 +16,11 @@ REPO_ROOT="$(cd "$HERE/.." && pwd)"
 # shellcheck source=./lib/assertions.sh
 source "$HERE/lib/assertions.sh"
 
-assert_reset "test_claude_watch_install"
+assert_reset "test_watch_install"
 
-CW_SH="$REPO_ROOT/claude-watch/install.sh"
+CW_SH="$REPO_ROOT/watch/install.sh"
 if [[ ! -f "$CW_SH" ]]; then
-  printf "%sSKIP%s test_claude_watch_install (claude-watch/install.sh not present)\n" \
+  printf "%sSKIP%s test_watch_install (watch/install.sh not present)\n" \
     "${_C_YELLOW:-}" "${_C_RESET:-}"
   exit 0
 fi
@@ -29,17 +29,17 @@ fi
 # Static contract.
 # ---------------------------------------------------------------------------
 assert_contains "$CW_SH" 're:^set -euo pipefail' \
-  "claude-watch/install.sh uses strict mode"
+  "watch/install.sh uses strict mode"
 assert_contains "$CW_SH" "verify_prerequisites" \
   "verify_prerequisites function defined"
-assert_contains "$CW_SH" "install_claude_watch_skill" \
-  "install_claude_watch_skill function defined"
+assert_contains "$CW_SH" "install_watch_skill" \
+  "install_watch_skill function defined"
 assert_contains "$CW_SH" "run_self_test" \
   "run_self_test function defined"
-assert_contains "$CW_SH" "fidgetcoding/creativity-maxxing/main/claude-watch-skill" \
-  "BASE_URL points at fidgetcoding/creativity-maxxing main claude-watch-skill"
-assert_contains "$CW_SH" 're:\$HOME/\.claude/skills/claude-watch' \
-  "skill installs to \$HOME/.claude/skills/claude-watch"
+assert_contains "$CW_SH" "fidgetcoding/creativity-maxxing/main/watch-skill" \
+  "BASE_URL points at fidgetcoding/creativity-maxxing main watch-skill"
+assert_contains "$CW_SH" 're:\$HOME/\.claude/skills/watch' \
+  "skill installs to \$HOME/.claude/skills/watch"
 
 # Every runtime file the vendored skill ships must be listed in CW_FILES.
 for f in "SKILL.md" \
@@ -47,7 +47,7 @@ for f in "SKILL.md" \
          "scripts/frames.py" "scripts/library.py" "scripts/resolve.py" \
          "scripts/scenes.py" "scripts/setup.py" "scripts/transcribe.py" \
          "scripts/watch.py" "scripts/whisper.py" \
-         "commands/claude-watch.md" \
+         "commands/watch.md" \
          "hooks/hooks.json" "hooks/scripts/session_start.sh"; do
   assert_contains "$CW_SH" "\"$f\"" \
     "CW_FILES includes $f"
@@ -64,32 +64,32 @@ assert_contains "$CW_SH" 're:cp .*LOCAL_SRC' \
   "local-fallback copy invoked when curl fails"
 
 # Self-test asserts the right files landed.
-assert_contains "$CW_SH" 're:TEST: claude-watch SKILL\.md' \
+assert_contains "$CW_SH" 're:TEST: watch SKILL\.md' \
   "self-test asserts SKILL.md landed"
 assert_contains "$CW_SH" "channel.py" \
   "self-test asserts channel.py landed (playlist/channel mode)"
 
 # main() wires every step.
-for fn in verify_prerequisites install_claude_watch_skill run_self_test print_summary; do
+for fn in verify_prerequisites install_watch_skill run_self_test print_summary; do
   assert_contains "$CW_SH" "re:^[[:space:]]+${fn}(\$|[[:space:]])" \
     "main() calls $fn"
 done
 
 # Vendored skill source must be present alongside the installer.
-VENDOR_DIR="$REPO_ROOT/claude-watch-skill"
-assert_file "$VENDOR_DIR/SKILL.md" "vendored SKILL.md at claude-watch-skill/"
+VENDOR_DIR="$REPO_ROOT/watch-skill"
+assert_file "$VENDOR_DIR/SKILL.md" "vendored SKILL.md at watch-skill/"
 for f in scripts/__init__.py scripts/channel.py scripts/download.py \
          scripts/frames.py scripts/library.py scripts/resolve.py \
          scripts/scenes.py scripts/setup.py scripts/transcribe.py \
          scripts/watch.py scripts/whisper.py \
-         commands/claude-watch.md \
+         commands/watch.md \
          hooks/hooks.json hooks/scripts/session_start.sh; do
   assert_file "$VENDOR_DIR/$f" \
     "vendored file: $f"
 done
 
 # Verify the vendored setup.py honors the shared whisper-model path so
-# claude-watch + media module share one ~141MB model file.
+# watch + media module share one ~141MB model file.
 assert_contains "$VENDOR_DIR/scripts/setup.py" 're:\.whisper.*ggml-base\.en\.bin' \
   "vendored setup.py recognizes ~/.whisper/ggml-base.en.bin (shared with media module)"
 
@@ -134,12 +134,12 @@ INSTALL_OUT="$(PATH="$MOCK_BIN:$PATH" HOME="$FAKE_HOME" \
 INSTALL_RC=$?
 set -e 2>/dev/null || true
 
-assert_eq "$INSTALL_RC" "0" "claude-watch/install.sh exits 0 with curl forced to fail (local fallback)"
+assert_eq "$INSTALL_RC" "0" "watch/install.sh exits 0 with curl forced to fail (local fallback)"
 
 # Count landed files.
-SKILL_DIR="$FAKE_HOME/.claude/skills/claude-watch"
+SKILL_DIR="$FAKE_HOME/.claude/skills/watch"
 if [[ -f "$SKILL_DIR/SKILL.md" ]]; then
-  _pass "SKILL.md landed at \$HOME/.claude/skills/claude-watch/"
+  _pass "SKILL.md landed at \$HOME/.claude/skills/watch/"
 else
   _fail "SKILL.md missing — local fallback did not fire"
 fi
@@ -163,10 +163,10 @@ else
 fi
 
 # commands + hooks dirs present.
-if [[ -f "$SKILL_DIR/commands/claude-watch.md" ]]; then
-  _pass "commands/claude-watch.md landed (slash command entry)"
+if [[ -f "$SKILL_DIR/commands/watch.md" ]]; then
+  _pass "commands/watch.md landed (slash command entry)"
 else
-  _fail "commands/claude-watch.md missing"
+  _fail "commands/watch.md missing"
 fi
 if [[ -f "$SKILL_DIR/hooks/hooks.json" ]]; then
   _pass "hooks/hooks.json landed"
@@ -190,7 +190,7 @@ RERUN_OUT="$(PATH="$MOCK_BIN:$PATH" HOME="$FAKE_HOME" \
 RERUN_RC=$?
 set -e 2>/dev/null || true
 
-assert_eq "$RERUN_RC" "0" "claude-watch/install.sh re-runs cleanly (idempotent under fallback)"
+assert_eq "$RERUN_RC" "0" "watch/install.sh re-runs cleanly (idempotent under fallback)"
 PY_COUNT_2="$(find "$SKILL_DIR/scripts" -type f -name '*.py' 2>/dev/null | wc -l | tr -d ' ')"
 assert_eq "$PY_COUNT_2" "11" "scripts/*.py count unchanged after re-run"
 
@@ -212,9 +212,9 @@ NOCLAUDE_RC=$?
 set -e 2>/dev/null || true
 
 if [[ "$NOCLAUDE_RC" -ne 0 ]]; then
-  _pass "claude-watch/install.sh exits non-zero when claude is absent"
+  _pass "watch/install.sh exits non-zero when claude is absent"
 else
-  _fail "claude-watch/install.sh exited 0 despite claude missing"
+  _fail "watch/install.sh exited 0 despite claude missing"
 fi
 if echo "$NOCLAUDE_OUT" | grep -qi 'cli-maxxing\|Claude Code not found'; then
   _pass "missing-claude message points at cli-maxxing"

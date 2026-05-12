@@ -38,7 +38,7 @@ fi
 SANDBOX="$TMPROOT/repo"
 mkdir -p "$SANDBOX"
 cp -R "$REPO_ROOT/install.sh" "$SANDBOX/install.sh"
-mkdir -p "$SANDBOX/design" "$SANDBOX/media" "$SANDBOX/copywriting" "$SANDBOX/claude-watch"
+mkdir -p "$SANDBOX/design" "$SANDBOX/media" "$SANDBOX/copywriting" "$SANDBOX/watch"
 
 CALL_LOG="$TMPROOT/calls.log"
 : > "$CALL_LOG"
@@ -58,13 +58,13 @@ cat > "$SANDBOX/copywriting/install.sh" <<SHIM
 echo "copywriting-shim: \$*" >> "$CALL_LOG"
 exit 0
 SHIM
-cat > "$SANDBOX/claude-watch/install.sh" <<SHIM
+cat > "$SANDBOX/watch/install.sh" <<SHIM
 #!/usr/bin/env bash
-echo "claude-watch-shim: \$*" >> "$CALL_LOG"
+echo "watch-shim: \$*" >> "$CALL_LOG"
 exit 0
 SHIM
 chmod +x "$SANDBOX/design/install.sh" "$SANDBOX/media/install.sh" \
-  "$SANDBOX/copywriting/install.sh" "$SANDBOX/claude-watch/install.sh"
+  "$SANDBOX/copywriting/install.sh" "$SANDBOX/watch/install.sh"
 
 FAKE_HOME="$TMPROOT/home"
 mkdir -p "$FAKE_HOME/.claude/skills"
@@ -109,10 +109,10 @@ if grep -q '^copywriting-shim:' "$CALL_LOG"; then
 else
   _fail "root install.sh did not call copywriting/install.sh"
 fi
-if grep -q '^claude-watch-shim:' "$CALL_LOG"; then
-  _pass "root install.sh delegated to claude-watch/install.sh"
+if grep -q '^watch-shim:' "$CALL_LOG"; then
+  _pass "root install.sh delegated to watch/install.sh"
 else
-  _fail "root install.sh did not call claude-watch/install.sh"
+  _fail "root install.sh did not call watch/install.sh"
 fi
 
 MARKER="$FAKE_HOME/.claude/.creativity-maxxing-installed"
@@ -198,8 +198,8 @@ assert_contains "$ROOT_INSTALL" "media/install.sh" \
   "root install.sh references media/install.sh"
 assert_contains "$ROOT_INSTALL" "copywriting/install.sh" \
   "root install.sh references copywriting/install.sh"
-assert_contains "$ROOT_INSTALL" "claude-watch/install.sh" \
-  "root install.sh references claude-watch/install.sh"
+assert_contains "$ROOT_INSTALL" "watch/install.sh" \
+  "root install.sh references watch/install.sh"
 assert_contains "$ROOT_INSTALL" ".creativity-maxxing-installed" \
   "root install.sh uses the canonical marker filename"
 
