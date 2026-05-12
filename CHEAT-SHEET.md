@@ -198,6 +198,28 @@ Under the hood: `yt-dlp` grabs the audio → `ffmpeg` converts it → `whisper-c
 
 `/watch` is transcription's bigger sibling. It downloads the video, picks scene-change frames with ffmpeg, lines them up against the transcript, then Claude reads every frame as an image and writes structured notes to `~/watch/library/<slug>/notes.md`. Runs key-free off the local whisper.cpp stack the media module already installed.
 
+### Natural-language activation
+
+You don't have to remember the slash command. Drop a URL into chat with any of these (and obvious variants) and the skill auto-triggers:
+
+```
+"watch this video: https://youtu.be/<id>"
+"study this lecture: <url>"
+"take notes on this video: <url>"
+"transcribe this reel: https://www.instagram.com/reel/<id>"
+"summarize this with frames: <url>"
+"break down this tiktok: <url>"
+"analyze this channel: https://www.youtube.com/@<handle>/videos"
+"scrape this creator's last 20 videos: <channel-url>"
+"sweep this playlist: <playlist-url>"
+"frame by frame on this video: <url>"
+"what hooks does this creator use? <channel-url>"
+"give me the script structure of this video: <url>"
+"research this creator: <channel-url>"
+```
+
+The SKILL.md description ships an explicit `Triggers on:` enumeration so Claude Code's auto-router picks `/watch` on natural-language requests, not just the literal slash command.
+
 ### Single video
 
 ```
