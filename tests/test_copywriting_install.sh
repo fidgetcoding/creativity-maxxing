@@ -146,7 +146,8 @@ fi
 # Idempotency: re-run with the SAME sandbox HOME — should still exit 0 and
 # leave the same file count (overwrites are fine, count must not grow).
 set +e
-RERUN_OUT="$(PATH="$MOCK_BIN:$PATH" HOME="$FAKE_HOME" \
+# shellcheck disable=SC2034 # _RERUN_OUT captured for debugging-on-fail; intentional
+_RERUN_OUT="$(PATH="$MOCK_BIN:$PATH" HOME="$FAKE_HOME" \
   bash "$COPY_SH" 2>&1)"
 RERUN_RC=$?
 set -e 2>/dev/null || true

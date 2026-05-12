@@ -75,7 +75,8 @@ install_copywriting_skill() {
     # Resolve local source dir from this script's path (works for clone + curl|bash)
     local SCRIPT_DIR
     SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]:-$0}")" 2>/dev/null && pwd || true)"
-    local LOCAL_SRC="$(dirname "$SCRIPT_DIR")/copywriting-skill"
+    local LOCAL_SRC
+    LOCAL_SRC="$(dirname "$SCRIPT_DIR")/copywriting-skill"
 
     download_one() {
         local rel="$1"
