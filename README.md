@@ -2,7 +2,7 @@
 
 <div align="center">
 
-![creativity-maxxing](https://raw.githubusercontent.com/lorecraft-io/creativity-maxxing/main/creativitymaxxing.png)
+![creativity-maxxing](https://raw.githubusercontent.com/fidgetcoding/creativity-maxxing/main/creativitymaxxing.png)
 
 # creativity-maxxing
 
@@ -73,13 +73,13 @@ There's more in here (Remotion for programmatic video, the Higgsfield/Seedance p
 One-liner:
 
 ```bash
-bash <(curl -fsSL https://raw.githubusercontent.com/lorecraft-io/creativity-maxxing/main/install.sh)
+bash <(curl -fsSL https://raw.githubusercontent.com/fidgetcoding/creativity-maxxing/main/install.sh)
 ```
 
 Or clone and run locally:
 
 ```bash
-git clone https://github.com/lorecraft-io/creativity-maxxing.git
+git clone https://github.com/fidgetcoding/creativity-maxxing.git
 cd creativity-maxxing
 bash install.sh
 ```
@@ -87,7 +87,7 @@ bash install.sh
 Want Gamma too? It's opt-in (it fails to connect without an API key from [gamma.app/api](https://gamma.app/api)):
 
 ```bash
-bash <(curl -fsSL https://raw.githubusercontent.com/lorecraft-io/creativity-maxxing/main/install.sh) --with-gamma
+bash <(curl -fsSL https://raw.githubusercontent.com/fidgetcoding/creativity-maxxing/main/install.sh) --with-gamma
 ```
 
 The installer runs `design/install.sh`, then `media/install.sh`, then `copywriting/install.sh`, then `watch/install.sh` in order, refuses to start if `claude` or `~/.claude/skills/` is missing, and is idempotent — re-run any time without duplicating installs. Idempotency marker: `~/.claude/.creativity-maxxing-installed` (delete to force a full reinstall).
@@ -203,7 +203,7 @@ The Taste Skill pack (`Leonxlnx/taste-skill`) ships 8 opinionated variants plus 
 Pull the latest without reinstalling from scratch:
 
 ```bash
-bash <(curl -fsSL https://raw.githubusercontent.com/lorecraft-io/creativity-maxxing/main/update.sh)
+bash <(curl -fsSL https://raw.githubusercontent.com/fidgetcoding/creativity-maxxing/main/update.sh)
 ```
 
 Every target is idempotent — anything already up-to-date is skipped.
@@ -213,7 +213,7 @@ Every target is idempotent — anything already up-to-date is skipped.
 ## Uninstall
 
 ```bash
-bash <(curl -fsSL https://raw.githubusercontent.com/lorecraft-io/creativity-maxxing/main/uninstall.sh)
+bash <(curl -fsSL https://raw.githubusercontent.com/fidgetcoding/creativity-maxxing/main/uninstall.sh)
 ```
 
 Or, from a clone:
@@ -232,9 +232,9 @@ This is one of three repos in the stack:
 
 | Repo | What it does |
 |------|-------------|
-| [`cli-maxxing`](https://github.com/lorecraft-io/cli-maxxing) | Foundation — Claude Code, shell aliases, dev tools, productivity MCPs (Morgen, Motion, n8n, Notion, Playwright, SwiftKit). |
+| [`cli-maxxing`](https://github.com/fidgetcoding/cli-maxxing) | Foundation — Claude Code, shell aliases, dev tools, productivity MCPs (Morgen, Motion, n8n, Notion, Playwright, SwiftKit). |
 | **`creativity-maxxing`** | **This repo** — design skills, video prompt engines, transcription lab, Canva in terminal. |
-| [`task-maxxing`](https://github.com/lorecraft-io/task-maxxing) | Two-way task sync — Obsidian ↔ Morgen (Notion dropped 2026-05-04) (requires [`2ndBrain-mogging`](https://github.com/lorecraft-io/2ndBrain-mogging)). |
+| [`task-maxxing`](https://github.com/fidgetcoding/task-maxxing) | Two-way task sync — Obsidian ↔ Morgen (Notion dropped 2026-05-04) (requires [`2ndBrain-mogging`](https://github.com/fidgetcoding/2ndBrain-mogging)). |
 
 Install `cli-maxxing` first (it drops `claude` onto your `PATH`). After that, `creativity-maxxing` and `task-maxxing` can be installed in either order.
 

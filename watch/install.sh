@@ -69,7 +69,7 @@ CW_FILES=(
 # -----------------------------------------------------------------------------
 install_watch_skill() {
     local SKILL_DIR="$HOME/.claude/skills/watch"
-    local BASE_URL="https://raw.githubusercontent.com/lorecraft-io/creativity-maxxing/main/watch-skill"
+    local BASE_URL="https://raw.githubusercontent.com/fidgetcoding/creativity-maxxing/main/watch-skill"
 
     mkdir -p "$SKILL_DIR/scripts" "$SKILL_DIR/commands" "$SKILL_DIR/hooks/scripts"
 

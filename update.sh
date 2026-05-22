@@ -31,7 +31,7 @@ echo ""
 
 _TMPDIR="$(mktemp -d)"
 trap 'rm -rf "$_TMPDIR"' EXIT
-git clone --quiet --depth 1 https://github.com/lorecraft-io/creativity-maxxing.git "$_TMPDIR"
+git clone --quiet --depth 1 https://github.com/fidgetcoding/creativity-maxxing.git "$_TMPDIR"
 
 bash "$_TMPDIR/design/install.sh"
 bash "$_TMPDIR/media/install.sh"

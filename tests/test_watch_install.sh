@@ -5,7 +5,7 @@
 # The watch module installs a single skill at ~/.claude/skills/watch
 # composed of SKILL.md + scripts/ (11 .py files) + commands/watch.md +
 # hooks/ (hooks.json + scripts/session_start.sh). The installer pulls each
-# file from raw.githubusercontent.com/lorecraft-io/creativity-maxxing/main/
+# file from raw.githubusercontent.com/fidgetcoding/creativity-maxxing/main/
 # watch-skill/ with a local fallback. This test asserts the static
 # contract + runs a behavioral probe that forces the local fallback path so
 # it works offline.
@@ -36,8 +36,8 @@ assert_contains "$CW_SH" "install_watch_skill" \
   "install_watch_skill function defined"
 assert_contains "$CW_SH" "run_self_test" \
   "run_self_test function defined"
-assert_contains "$CW_SH" "lorecraft-io/creativity-maxxing/main/watch-skill" \
-  "BASE_URL points at lorecraft-io/creativity-maxxing main watch-skill"
+assert_contains "$CW_SH" "fidgetcoding/creativity-maxxing/main/watch-skill" \
+  "BASE_URL points at fidgetcoding/creativity-maxxing main watch-skill"
 assert_contains "$CW_SH" 're:\$HOME/\.claude/skills/watch' \
   "skill installs to \$HOME/.claude/skills/watch"
 

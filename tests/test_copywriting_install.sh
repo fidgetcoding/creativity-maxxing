@@ -4,7 +4,7 @@
 #
 # The copywriting module installs a single skill at ~/.claude/skills/copywriting
 # composed of SKILL.md + 19 reference files. The installer pulls each file from
-# raw.githubusercontent.com/lorecraft-io/creativity-maxxing/main with a local
+# raw.githubusercontent.com/fidgetcoding/creativity-maxxing/main with a local
 # fallback. This test asserts the static contract + runs a behavioral probe
 # that forces the local fallback path so it works offline.
 
@@ -34,8 +34,8 @@ assert_contains "$COPY_SH" "install_copywriting_skill" \
   "install_copywriting_skill function defined"
 assert_contains "$COPY_SH" "run_self_test" \
   "run_self_test function defined"
-assert_contains "$COPY_SH" "lorecraft-io/creativity-maxxing/main/copywriting-skill" \
-  "BASE_URL points at lorecraft-io/creativity-maxxing main copywriting-skill"
+assert_contains "$COPY_SH" "fidgetcoding/creativity-maxxing/main/copywriting-skill" \
+  "BASE_URL points at fidgetcoding/creativity-maxxing main copywriting-skill"
 assert_contains "$COPY_SH" 're:\$HOME/\.claude/skills/copywriting' \
   "skill installs to \$HOME/.claude/skills/copywriting"
 

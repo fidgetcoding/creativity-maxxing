@@ -68,7 +68,7 @@ HERE="$(cd "$(dirname "${BASH_SOURCE[0]:-$0}")" 2>/dev/null && pwd || true)"
 if [ ! -f "$HERE/design/install.sh" ]; then
     _TMPDIR="$(mktemp -d)"
     trap 'rm -rf "$_TMPDIR"' EXIT
-    git clone --quiet --depth 1 https://github.com/lorecraft-io/creativity-maxxing.git "$_TMPDIR"
+    git clone --quiet --depth 1 https://github.com/fidgetcoding/creativity-maxxing.git "$_TMPDIR"
     HERE="$_TMPDIR"
 fi
 

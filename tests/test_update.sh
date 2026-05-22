@@ -4,7 +4,7 @@
 #   - clones into a mktemp dir
 #   - traps EXIT to rm -rf that dir (cleanup regardless of success)
 #   - re-runs design/install.sh AND media/install.sh (idempotent)
-#   - points at the lorecraft-io/creativity-maxxing upstream
+#   - points at the fidgetcoding/creativity-maxxing upstream
 
 set -u
 HERE="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
@@ -30,8 +30,8 @@ assert_contains "$UPDATE_SH" 're:mktemp -d' \
   "update.sh creates a tempdir via 'mktemp -d'"
 assert_contains "$UPDATE_SH" 're:trap .*rm -rf.*EXIT' \
   "update.sh installs a trap EXIT that 'rm -rf's the tempdir"
-assert_contains "$UPDATE_SH" "lorecraft-io/creativity-maxxing" \
-  "update.sh clones from lorecraft-io/creativity-maxxing"
+assert_contains "$UPDATE_SH" "fidgetcoding/creativity-maxxing" \
+  "update.sh clones from fidgetcoding/creativity-maxxing"
 assert_contains "$UPDATE_SH" "design/install.sh" \
   "update.sh re-runs design/install.sh"
 assert_contains "$UPDATE_SH" "media/install.sh" \

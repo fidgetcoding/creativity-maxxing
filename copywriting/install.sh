@@ -68,7 +68,7 @@ COPY_REF_FILES=(
 install_copywriting_skill() {
     local SKILL_DIR="$HOME/.claude/skills/copywriting"
     local SKILL_REF_DIR="$SKILL_DIR/references"
-    local BASE_URL="https://raw.githubusercontent.com/lorecraft-io/creativity-maxxing/main/copywriting-skill"
+    local BASE_URL="https://raw.githubusercontent.com/fidgetcoding/creativity-maxxing/main/copywriting-skill"
 
     mkdir -p "$SKILL_REF_DIR"
 
