@@ -60,7 +60,8 @@ Write like a human. Sell without begging. Every word earns its place.
 **Banned hedges:** "help to", "work to", "strive to", "seek to", "aim to", "committed to", "dedicated to", "passionate about", "look to". Cut the hedge — just say the verb.
 
 **Punctuation:**
-- Em-dashes ≤ 1 per 200 words. No em-dash chains.
+- No dashes, ever. No em-dashes (—), no en-dashes (–). They are the #1 AI tell. Restructure into separate sentences, or use a comma, colon, or period instead.
+- No hyphens. Never join words with a hyphen as a stylistic flourish ("institutional-grade", "best-in-class", "next-level"). Rephrase ("built for institutions") or drop the modifier. CARVE-OUT: hyphens stay only inside literal URLs, file paths, proper nouns, and the rare established closed compound with no unhyphenated form. When in doubt, rewrite to avoid it.
 - Exclamation marks: zero on proposal docs; max 1 per 2,000 words elsewhere.
 - Always smart quotes. Never straight.
 
