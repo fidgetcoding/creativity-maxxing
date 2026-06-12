@@ -141,7 +141,9 @@ install_higgsfield_skills() {
 
     local _TMP
     _TMP="$(mktemp -d)"
-    trap 'rm -rf "$_TMP"' RETURN
+    # RETURN traps set in a function persist for later function returns; _TMP is
+    # local, so guard the expansion or set -u kills the run after this returns.
+    trap 'rm -rf "${_TMP:-}"' RETURN
 
     if ! git clone --quiet --depth 1 https://github.com/beshuaxian/higgsfield-seedance2-jineng.git "$_TMP" 2>/dev/null; then
         soft_fail "Could not clone Higgsfield repo — skipping. Install manually: https://github.com/beshuaxian/higgsfield-seedance2-jineng"
