@@ -52,12 +52,31 @@ echo ""
 echo -e "${BLUE}━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━${NC}"
 echo ""
 
+# Opt-in flags (--with-gamma, any future --with-*) must still work on an
+# already-installed machine. The module installers are idempotent, so when an
+# opt-in flag is passed we skip the marker early-exit and forward the flags
+# instead of telling the user the documented re-run path is a no-op.
+OPT_IN_RERUN=0
+for _arg in "$@"; do
+    case "$_arg" in
+        --with-*) OPT_IN_RERUN=1 ;;
+    esac
+done
+
 if [ -f "$MARKER" ]; then
-    echo -e "${YELLOW}  Already installed. Delete the marker to force a full reinstall:${NC}"
-    echo -e "${YELLOW}    rm ~/.claude/.creativity-maxxing-installed${NC}"
-    echo -e "${YELLOW}  Then re-run this script.${NC}"
-    echo ""
-    exit 0
+    if [ "$OPT_IN_RERUN" = "1" ]; then
+        echo -e "${YELLOW}  Already installed — opt-in flag detected. Re-running the module${NC}"
+        echo -e "${YELLOW}  installers (idempotent) to apply: $*${NC}"
+        echo ""
+    else
+        echo -e "${YELLOW}  Already installed. Delete the marker to force a full reinstall:${NC}"
+        echo -e "${YELLOW}    rm ~/.claude/.creativity-maxxing-installed${NC}"
+        echo -e "${YELLOW}  Then re-run this script.${NC}"
+        echo -e "${YELLOW}  (Opt-in flags like --with-gamma re-run automatically — no marker${NC}"
+        echo -e "${YELLOW}  delete needed.)${NC}"
+        echo ""
+        exit 0
+    fi
 fi
 
 command -v claude >/dev/null || { echo "Claude Code not found — run cli-maxxing first"; exit 1; }
