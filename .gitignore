@@ -48,3 +48,4 @@ renders/
 *.wav
 *.m4a
 whisper-cache/
+.mailmap
