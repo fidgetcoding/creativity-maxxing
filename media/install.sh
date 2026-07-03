@@ -43,6 +43,44 @@ pin_npm() {
     if [ -n "$v" ]; then echo "$1@$v"; else echo "$1@latest"; fi
 }
 
+# Install a GitHub skill pack at a pinned commit (rug-pull defense). The
+# `skills` CLI (v1.5.14) has no ref-pinning syntax, so we clone + checkout the
+# audited SHA ourselves and copy each SKILL.md's directory to
+# ~/.claude/skills/<name>/ using its `name:` frontmatter — replicating the
+# CLI's default skills/<name>/SKILL.md discovery deterministically.
+# Args: $1 = repo URL, $2 = pinned commit SHA, $3 = label
+install_skill_pack_pinned() {
+    local url="$1" sha="$2" label="$3"
+    local tmp
+    tmp="$(mktemp -d)"
+    if ! git clone --quiet "$url" "$tmp" 2>/dev/null; then
+        rm -rf "$tmp"
+        soft_fail "$label: clone failed ($url)"
+        return 1
+    fi
+    if ! git -C "$tmp" checkout --quiet "$sha" 2>/dev/null; then
+        rm -rf "$tmp"
+        soft_fail "$label: pinned commit $sha not found upstream"
+        return 1
+    fi
+    local search_root="$tmp"
+    if [ -d "$tmp/skills" ]; then search_root="$tmp/skills"; fi
+    local installed=0
+    local skill_md name dest
+    while IFS= read -r skill_md; do
+        name="$(sed -n 's/^name:[[:space:]]*//p' "$skill_md" | head -1 | tr -d '"' | tr -d "'")"
+        if [ -z "$name" ]; then continue; fi
+        dest="$HOME/.claude/skills/$name"
+        if [ -f "$dest/SKILL.md" ]; then continue; fi
+        mkdir -p "$dest"
+        cp -R "$(dirname "$skill_md")/." "$dest/"
+        installed=$((installed + 1))
+    done < <(find "$search_root" -name SKILL.md -not -path '*/.git/*' 2>/dev/null)
+    rm -rf "$tmp"
+    success "$label installed ($installed new, pinned @ ${sha:0:7})"
+    return 0
+}
+
 # -----------------------------------------------------------------------------
 # Detect OS
 # -----------------------------------------------------------------------------
@@ -95,18 +133,14 @@ install_remotion_skills() {
         return
     fi
 
-    npx skills add remotion-dev/skills --yes --global 2>/dev/null
+    # Pinned to an audited commit — bump REMOTION_COMMIT to update.
+    local REMOTION_COMMIT="8dad6ec5c5c7cedee4d2aa620bb68386f8fe8eb9"
+    install_skill_pack_pinned "https://github.com/remotion-dev/skills" "$REMOTION_COMMIT" "Remotion skills" || true
 
     if [ -d "$HOME/.claude/skills/remotion-best-practices" ] || [ -L "$HOME/.claude/skills/remotion-best-practices" ]; then
         success "Remotion skills installed for Claude Code"
     else
-        npx skills add remotion-dev/skills --yes 2>/dev/null
-
-        if [ -d "$HOME/.claude/skills/remotion-best-practices" ] || [ -L "$HOME/.claude/skills/remotion-best-practices" ]; then
-            success "Remotion skills installed"
-        else
-            soft_fail "Remotion skills installation could not be verified"
-        fi
+        soft_fail "Remotion skills installation could not be verified"
     fi
 }
 
@@ -155,8 +189,11 @@ install_higgsfield_skills() {
     # local, so guard the expansion or set -u kills the run after this returns.
     trap 'rm -rf "${_TMP:-}"' RETURN
 
-    if ! git clone --quiet --depth 1 https://github.com/beshuaxian/higgsfield-seedance2-jineng.git "$_TMP" 2>/dev/null; then
-        soft_fail "Could not clone Higgsfield repo — skipping. Install manually: https://github.com/beshuaxian/higgsfield-seedance2-jineng"
+    # Pinned to an audited commit (rug-pull defense) — bump HIGGS_COMMIT to update.
+    local HIGGS_COMMIT="83dcb10ee38c9694ac0f455ec55a62f2be3b8a14"
+    if ! git clone --quiet https://github.com/beshuaxian/higgsfield-seedance2-jineng.git "$_TMP" 2>/dev/null \
+        || ! git -C "$_TMP" checkout --quiet "$HIGGS_COMMIT" 2>/dev/null; then
+        soft_fail "Could not clone Higgsfield repo at pinned commit ${HIGGS_COMMIT:0:7} — skipping. Install manually: https://github.com/beshuaxian/higgsfield-seedance2-jineng"
         return
     fi
 

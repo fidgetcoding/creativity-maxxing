@@ -39,6 +39,44 @@ pin_npm() {
     if [ -n "$v" ]; then echo "$1@$v"; else echo "$1@latest"; fi
 }
 
+# Install a GitHub skill pack at a pinned commit (rug-pull defense). The
+# `skills` CLI (v1.5.14) has no ref-pinning syntax, so we clone + checkout the
+# audited SHA ourselves and copy each SKILL.md's directory to
+# ~/.claude/skills/<name>/ using its `name:` frontmatter — replicating the
+# CLI's default skills/<name>/SKILL.md discovery deterministically.
+# Args: $1 = repo URL, $2 = pinned commit SHA, $3 = label
+install_skill_pack_pinned() {
+    local url="$1" sha="$2" label="$3"
+    local tmp
+    tmp="$(mktemp -d)"
+    if ! git clone --quiet "$url" "$tmp" 2>/dev/null; then
+        rm -rf "$tmp"
+        soft_fail "$label: clone failed ($url)"
+        return 1
+    fi
+    if ! git -C "$tmp" checkout --quiet "$sha" 2>/dev/null; then
+        rm -rf "$tmp"
+        soft_fail "$label: pinned commit $sha not found upstream"
+        return 1
+    fi
+    local search_root="$tmp"
+    if [ -d "$tmp/skills" ]; then search_root="$tmp/skills"; fi
+    local installed=0
+    local skill_md name dest
+    while IFS= read -r skill_md; do
+        name="$(sed -n 's/^name:[[:space:]]*//p' "$skill_md" | head -1 | tr -d '"' | tr -d "'")"
+        if [ -z "$name" ]; then continue; fi
+        dest="$HOME/.claude/skills/$name"
+        if [ -f "$dest/SKILL.md" ]; then continue; fi
+        mkdir -p "$dest"
+        cp -R "$(dirname "$skill_md")/." "$dest/"
+        installed=$((installed + 1))
+    done < <(find "$search_root" -name SKILL.md -not -path '*/.git/*' 2>/dev/null)
+    rm -rf "$tmp"
+    success "$label installed ($installed new, pinned @ ${sha:0:7})"
+    return 0
+}
+
 # -----------------------------------------------------------------------------
 # Detect OS
 # -----------------------------------------------------------------------------
@@ -124,7 +162,9 @@ install_uiux_skill() {
 
 # -----------------------------------------------------------------------------
 # Install Taste Skill (Leonxlnx/taste-skill)
-# Upstream ships 8 skills whose `name:` frontmatter drives their installed path:
+# Upstream ships 13 skills at the pinned commit, whose `name:` frontmatter
+# drives their installed path. The 8 canonical ones below anchor the
+# installed-count verification:
 #   design-taste-frontend, high-end-visual-design, full-output-enforcement,
 #   redesign-existing-projects, stitch-design-taste, minimalist-ui,
 #   industrial-brutalist-ui, gpt-taste
@@ -160,16 +200,12 @@ install_taste_skill() {
 
     info "Installing Taste Skill pack (Leonxlnx/taste-skill)..."
 
-    local TASTE_SKILL_URL="https://github.com/Leonxlnx/taste-skill"
-
-    npx skills add "$TASTE_SKILL_URL" --yes --global 2>/dev/null
+    # Pinned to an audited commit — bump TASTE_COMMIT to update.
+    local TASTE_COMMIT="06d6028b5c623016c59ce8536f578e5a1127b499"
+    install_skill_pack_pinned "https://github.com/Leonxlnx/taste-skill" "$TASTE_COMMIT" "Taste Skill pack" || true
 
     local after_count
     after_count="$(taste_installed_count)"
-    if [ "$after_count" -lt 8 ]; then
-        npx skills add "$TASTE_SKILL_URL" --yes 2>/dev/null
-        after_count="$(taste_installed_count)"
-    fi
 
     if [ "$after_count" -ge 8 ]; then
         success "Taste Skill installed ($after_count/8 variants under ~/.claude/skills/)"
