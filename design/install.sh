@@ -29,6 +29,16 @@ warn()    { echo -e "${YELLOW}[WARN]${NC} $1"; }
 fail()    { echo -e "${RED}[FAIL]${NC} $1"; exit 1; }
 soft_fail() { echo -e "${RED}[FAIL]${NC} $1 (non-critical, continuing...)"; ERRORS=$((ERRORS + 1)); }
 
+# Pin an npm package to the version published right now, so the MCP
+# registration written into Claude's config doesn't re-resolve to whatever
+# is newest on npm at every future session start (rug-pull defense).
+# Falls back to @latest only if npm/network is unavailable at install time.
+pin_npm() {
+    local v
+    v=$(npm view "$1" version 2>/dev/null)
+    if [ -n "$v" ]; then echo "$1@$v"; else echo "$1@latest"; fi
+}
+
 # -----------------------------------------------------------------------------
 # Detect OS
 # -----------------------------------------------------------------------------
@@ -178,8 +188,10 @@ install_21st_magic() {
     fi
 
     info "Adding 21st.dev Magic MCP to Claude Code..."
-    npx -y @anthropic-ai/claude-code mcp add magic -- npx -y @21st-dev/magic@latest 2>/dev/null \
-        || claude mcp add magic -- npx -y @21st-dev/magic@latest 2>/dev/null
+    local MAGIC_PKG
+    MAGIC_PKG="$(pin_npm @21st-dev/magic)"
+    npx -y @anthropic-ai/claude-code mcp add magic -- npx -y "$MAGIC_PKG" 2>/dev/null \
+        || claude mcp add magic -- npx -y "$MAGIC_PKG" 2>/dev/null
 
     if claude mcp list 2>/dev/null | grep -qE '^magic:' 2>/dev/null; then
         success "21st.dev Magic MCP configured"
@@ -271,7 +283,7 @@ install_playwright() {
     echo -e "${BLUE}  Runs a separate Chromium instance — first launch auto-downloads it.${NC}"
     echo ""
 
-    claude mcp add playwright -- npx -y @playwright/mcp@latest 2>/dev/null
+    claude mcp add playwright -- npx -y "$(pin_npm @playwright/mcp)" 2>/dev/null
 
     if claude mcp list 2>/dev/null | grep -qE '^playwright:' 2>/dev/null; then
         success "Playwright MCP configured"

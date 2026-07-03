@@ -33,6 +33,16 @@ warn()    { echo -e "${YELLOW}[WARN]${NC} $1"; }
 fail()    { echo -e "${RED}[FAIL]${NC} $1"; exit 1; }
 soft_fail() { echo -e "${RED}[FAIL]${NC} $1 (non-critical, continuing...)"; ERRORS=$((ERRORS + 1)); }
 
+# Pin an npm package to the version published right now, so the MCP
+# registration written into Claude's config doesn't re-resolve to whatever
+# is newest on npm at every future session start (rug-pull defense).
+# Falls back to @latest only if npm/network is unavailable at install time.
+pin_npm() {
+    local v
+    v=$(npm view "$1" version 2>/dev/null)
+    if [ -n "$v" ]; then echo "$1@$v"; else echo "$1@latest"; fi
+}
+
 # -----------------------------------------------------------------------------
 # Detect OS
 # -----------------------------------------------------------------------------
@@ -187,7 +197,7 @@ install_youtube_transcript() {
         return
     fi
 
-    claude mcp add --scope user youtube-transcript -- npx -y @kimtaeyoon83/mcp-server-youtube-transcript 2>/dev/null
+    claude mcp add --scope user youtube-transcript -- npx -y "$(pin_npm @kimtaeyoon83/mcp-server-youtube-transcript)" 2>/dev/null
 
     if claude mcp list 2>/dev/null | grep -qE '^youtube-transcript:'; then
         success "YouTube Transcript MCP installed"
@@ -207,7 +217,7 @@ install_ytdlp_mcp() {
         return
     fi
 
-    claude mcp add --scope user yt-dlp -- npx -y @kevinwatt/yt-dlp-mcp@latest 2>/dev/null
+    claude mcp add --scope user yt-dlp -- npx -y "$(pin_npm @kevinwatt/yt-dlp-mcp)" 2>/dev/null
 
     if claude mcp list 2>/dev/null | grep -qE '^yt-dlp:'; then
         success "yt-dlp MCP installed"
@@ -300,7 +310,7 @@ install_whisper_mcp() {
         return
     fi
 
-    claude mcp add --scope user whisper-mcp -- npx -y whisper-mcp 2>/dev/null
+    claude mcp add --scope user whisper-mcp -- npx -y "$(pin_npm whisper-mcp)" 2>/dev/null
 
     if claude mcp list 2>/dev/null | grep -qE '^whisper-mcp:'; then
         success "Whisper MCP installed"
@@ -334,7 +344,7 @@ install_whisper_model_basen() {
     if [ "$NO_WHISPER_MODEL" = "1" ]; then
         WHISPER_MODEL_STATUS="SKIPPED"
         info "Whisper base.en model fetch skipped (--no-whisper-model)"
-        echo "    To install later: mkdir -p ~/.whisper && curl -fL \"$MODEL_URL\" -o ~/.whisper/ggml-base.en.bin"
+        echo "    To install later: mkdir -p ~/.whisper && curl -fL --proto '=https' --proto-redir '=https' \"$MODEL_URL\" -o ~/.whisper/ggml-base.en.bin"
         return
     fi
 
@@ -364,7 +374,7 @@ install_whisper_model_basen() {
         rm -f "$MODEL_FILE"
         WHISPER_MODEL_STATUS="FAILED"
         soft_fail "Whisper base.en model download failed. Install manually:
-    mkdir -p ~/.whisper && curl -fL \"$MODEL_URL\" -o ~/.whisper/ggml-base.en.bin"
+    mkdir -p ~/.whisper && curl -fL --proto '=https' --proto-redir '=https' \"$MODEL_URL\" -o ~/.whisper/ggml-base.en.bin"
         return
     fi
 
@@ -379,7 +389,7 @@ install_whisper_model_basen() {
         rm -f "$MODEL_FILE"
         WHISPER_MODEL_STATUS="FAILED"
         soft_fail "Whisper base.en model truncated ($_size bytes < $MIN_SIZE byte floor). Removed partial file. Re-run installer or fetch manually:
-    mkdir -p ~/.whisper && curl -fL \"$MODEL_URL\" -o ~/.whisper/ggml-base.en.bin"
+    mkdir -p ~/.whisper && curl -fL --proto '=https' --proto-redir '=https' \"$MODEL_URL\" -o ~/.whisper/ggml-base.en.bin"
         return
     fi
 
