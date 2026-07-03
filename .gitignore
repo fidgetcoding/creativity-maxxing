@@ -49,3 +49,7 @@ renders/
 *.m4a
 whisper-cache/
 .mailmap
+
+# git-filter-repo artifact — records previously-scrubbed secret replacements
+# (old value → replacement). Must never be committed; delete after review.
+.filter-repo-replacements.txt

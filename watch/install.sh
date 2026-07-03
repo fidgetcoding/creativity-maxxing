@@ -84,7 +84,7 @@ install_watch_skill() {
         local dest="$2"
         local tmp="$dest.tmp"
         mkdir -p "$(dirname "$dest")"
-        if curl -fsSL "$BASE_URL/$rel" -o "$tmp" 2>/dev/null && [ -s "$tmp" ]; then
+        if curl -fsSL --proto '=https' --proto-redir '=https' "$BASE_URL/$rel" -o "$tmp" 2>/dev/null && [ -s "$tmp" ]; then
             mv "$tmp" "$dest"
             return 0
         fi

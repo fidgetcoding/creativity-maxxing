@@ -82,7 +82,7 @@ install_copywriting_skill() {
         local rel="$1"
         local dest="$2"
         local tmp="$dest.tmp"
-        if curl -fsSL "$BASE_URL/$rel" -o "$tmp" 2>/dev/null && [ -s "$tmp" ]; then
+        if curl -fsSL --proto '=https' --proto-redir '=https' "$BASE_URL/$rel" -o "$tmp" 2>/dev/null && [ -s "$tmp" ]; then
             mv "$tmp" "$dest"
             return 0
         fi

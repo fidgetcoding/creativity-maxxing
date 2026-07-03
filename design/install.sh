@@ -91,7 +91,7 @@ install_uiux_skill() {
     local UIUX_SHA256="1c8b62068136ce3af4f6fe8d990a7da79b7ec6fd837c760b5ded4833b9756779"
 
     local SKILL_TMP="$SKILL_DIR/SKILL.md.tmp"
-    if curl -fsSL "$SKILL_URL" -o "$SKILL_TMP" 2>/dev/null && [ -s "$SKILL_TMP" ]; then
+    if curl -fsSL --proto '=https' --proto-redir '=https' "$SKILL_URL" -o "$SKILL_TMP" 2>/dev/null && [ -s "$SKILL_TMP" ]; then
         # Verify integrity before accepting the file
         local _sha=""
         if command -v shasum &>/dev/null; then

@@ -360,7 +360,7 @@ install_whisper_model_basen() {
     info "  Source: $MODEL_URL"
     info "  Checksum: server-side LFS only (HuggingFace does not publish a content SHA256)"
 
-    if ! curl -fL --retry 2 --connect-timeout 15 "$MODEL_URL" -o "$MODEL_FILE" 2>/dev/null; then
+    if ! curl -fL --proto '=https' --proto-redir '=https' --retry 2 --connect-timeout 15 "$MODEL_URL" -o "$MODEL_FILE" 2>/dev/null; then
         rm -f "$MODEL_FILE"
         WHISPER_MODEL_STATUS="FAILED"
         soft_fail "Whisper base.en model download failed. Install manually:
