@@ -14,6 +14,9 @@ set -euo pipefail
 # Copywriting module:  /copywriting skill — master-trained anti-AI-slop filter
 #                      (Bernbach, Hegarty, Abbott, Trott, Wieden, Sugarman,
 #                      Sackheim, Schwartz, Bencivenga, Gossage, Krone, McElligott)
+#                      /humanizer skill — AI-tell scrubber, 33 patterns from
+#                      Wikipedia's "Signs of AI writing" (blader/humanizer,
+#                      commit-pinned). Finishing pass after /copywriting.
 # Claude-Watch module: /watch skill — drop any video/channel/playlist
 #                      URL and get back timestamped, frame-aware study notes.
 #                      Uses the media-module's local whisper.cpp + yt-dlp stack
@@ -44,6 +47,7 @@ echo "    whisper-cpp · whisper-mcp · FFmpeg"
 echo ""
 echo "  Copywriting module:"
 echo "    /copywriting skill — anti-AI-slop master-trained copy filter"
+echo "    /humanizer skill   — AI-tell scrubber (finishing pass)"
 echo ""
 echo "  Claude-Watch module:"
 echo "    /watch skill — frame-aware video → structured study notes"

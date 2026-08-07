@@ -270,6 +270,19 @@ remove_copywriting_skill() {
 }
 
 # -----------------------------------------------------------------------------
+# Remove /humanizer skill (installed by the copywriting module)
+# -----------------------------------------------------------------------------
+remove_humanizer_skill() {
+    local SKILL_DIR="$HOME/.claude/skills/humanizer"
+    if [ -d "$SKILL_DIR" ] || [ -L "$SKILL_DIR" ]; then
+        rm -rf "$SKILL_DIR"
+        removed_one "Removed /humanizer skill"
+    else
+        skipped_one "/humanizer skill not present"
+    fi
+}
+
+# -----------------------------------------------------------------------------
 # Remove /watch skill (the skill itself, not the model/library cache)
 # -----------------------------------------------------------------------------
 remove_watch_skill() {
@@ -361,6 +374,7 @@ main() {
     remove_whisper_cpp
     remove_whisper_mcp
     remove_copywriting_skill
+    remove_humanizer_skill
     remove_watch_skill
     remove_watch_state
     remove_ffmpeg_prompt

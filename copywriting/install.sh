@@ -3,12 +3,19 @@ set -euo pipefail
 
 # =============================================================================
 # creativity-maxxing — Copywriting module
-# Installs the /copywriting skill — the operator's anti-AI-slop, master-trained
-# copywriting filter (Bernbach, Hegarty, Abbott, Trott, Wieden, Sugarman,
-# Sackheim, Schwartz, Bencivenga, Gossage, Krone, McElligott).
+# Installs two skills:
 #
-# Downloads SKILL.md + 19 reference files from this repo's `copywriting-skill/`
-# directory on main, with a local fallback when running from a clone.
+#   /copywriting — the operator's anti-AI-slop, master-trained copywriting
+#                  filter (Bernbach, Hegarty, Abbott, Trott, Wieden, Sugarman,
+#                  Sackheim, Schwartz, Bencivenga, Gossage, Krone, McElligott).
+#                  SKILL.md + 19 reference files downloaded from this repo's
+#                  `copywriting-skill/` directory on main, with a local
+#                  fallback when running from a clone.
+#
+#   /humanizer   — third-party AI-tell scrubber (blader/humanizer), installed
+#                  from a pinned commit. 33 patterns lifted from Wikipedia's
+#                  "Signs of AI writing". Runs AFTER /copywriting as a
+#                  finishing pass; the two conflict if run together.
 # =============================================================================
 
 RED='\033[0;31m'
@@ -110,6 +117,61 @@ install_copywriting_skill() {
 }
 
 # -----------------------------------------------------------------------------
+# Install the /humanizer skill from a pinned commit (rug-pull defense, same
+# posture as the taste-skill / remotion packs in design/ + media/).
+#
+# blader/humanizer keeps SKILL.md at the repo root rather than under skills/,
+# so the generic install_skill_pack_pinned discovery in design/install.sh would
+# copy the whole checkout including .git. This copies the payload and drops the
+# VCS metadata instead. Bump HUMANIZER_COMMIT to update.
+# -----------------------------------------------------------------------------
+install_humanizer_skill() {
+    local SKILL_DIR="$HOME/.claude/skills/humanizer"
+    local HUMANIZER_URL="https://github.com/blader/humanizer"
+    local HUMANIZER_COMMIT="523374dee72d67c7b2b5f858ea0094ffda49c3ac"
+
+    if [ -f "$SKILL_DIR/SKILL.md" ]; then
+        success "/humanizer skill already installed"
+        return 0
+    fi
+
+    if ! command -v git &>/dev/null; then
+        soft_fail "/humanizer needs git — install git and re-run"
+        return 1
+    fi
+
+    info "Installing /humanizer skill (blader/humanizer @ ${HUMANIZER_COMMIT:0:7})..."
+
+    local tmp
+    tmp="$(mktemp -d)"
+
+    if ! git clone --quiet "$HUMANIZER_URL" "$tmp" 2>/dev/null; then
+        rm -rf "$tmp"
+        soft_fail "/humanizer: clone failed ($HUMANIZER_URL)"
+        return 1
+    fi
+
+    if ! git -C "$tmp" checkout --quiet "$HUMANIZER_COMMIT" 2>/dev/null; then
+        rm -rf "$tmp"
+        soft_fail "/humanizer: pinned commit $HUMANIZER_COMMIT not found upstream"
+        return 1
+    fi
+
+    if [ ! -f "$tmp/SKILL.md" ]; then
+        rm -rf "$tmp"
+        soft_fail "/humanizer: SKILL.md not found at the pinned commit"
+        return 1
+    fi
+
+    rm -rf "$tmp/.git" "$tmp/.github"
+    mkdir -p "$SKILL_DIR"
+    cp -R "$tmp/." "$SKILL_DIR/"
+    rm -rf "$tmp"
+
+    success "/humanizer skill installed at $SKILL_DIR (pinned @ ${HUMANIZER_COMMIT:0:7})"
+}
+
+# -----------------------------------------------------------------------------
 # Self-test — confirm SKILL.md + a sentinel reference landed
 # -----------------------------------------------------------------------------
 run_self_test() {
@@ -132,6 +194,22 @@ run_self_test() {
         fail=$((fail + 1))
     fi
 
+    if [ -f "$HOME/.claude/skills/humanizer/SKILL.md" ]; then
+        success "TEST: humanizer SKILL.md installed"
+        pass=$((pass + 1))
+    else
+        soft_fail "TEST: humanizer SKILL.md missing"
+        fail=$((fail + 1))
+    fi
+
+    if [ ! -d "$HOME/.claude/skills/humanizer/.git" ]; then
+        success "TEST: humanizer install carries no .git metadata"
+        pass=$((pass + 1))
+    else
+        soft_fail "TEST: humanizer install left a .git directory behind"
+        fail=$((fail + 1))
+    fi
+
     echo ""
     if [ "$fail" -eq 0 ]; then
         success "Copywriting module self-test: $pass/$pass passed"
@@ -146,13 +224,19 @@ print_summary() {
     echo -e "${GREEN}  Copywriting module install complete.${NC}"
     echo -e "${GREEN}━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━${NC}"
     echo ""
-    echo "  Skill installed:"
+    echo "  Skills installed:"
     echo "    /copywriting — master-trained anti-AI-slop copy filter"
     echo "                   (20 files: 1 SKILL.md + 19 references)"
+    echo "    /humanizer   — AI-tell scrubber, 33 patterns from Wikipedia's"
+    echo "                   \"Signs of AI writing\" (blader/humanizer, pinned)"
     echo ""
-    echo "  Auto-activates on: headline, hero, body, CTA, manifesto,"
-    echo "                     proposal copy, landing pages, ad copy,"
-    echo "                     brand voice, naming, \"rewrite this paragraph\""
+    echo "  /copywriting auto-activates on: headline, hero, body, CTA,"
+    echo "                     manifesto, proposal copy, landing pages,"
+    echo "                     ad copy, brand voice, naming,"
+    echo "                     \"rewrite this paragraph\""
+    echo ""
+    echo "  /humanizer runs AFTER /copywriting as a finishing pass."
+    echo "  Do not run both on the same draft at once — they fight."
     echo ""
     if [ "$ERRORS" -gt 0 ]; then
         echo -e "${YELLOW}  $ERRORS non-critical error(s) above — copy is partial.${NC}"
@@ -165,11 +249,13 @@ main() {
     echo -e "${BLUE}━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━${NC}"
     echo -e "${BLUE}  Copywriting Module${NC}"
     echo -e "${BLUE}  /copywriting — anti-AI-slop master-trained copy filter${NC}"
+    echo -e "${BLUE}  /humanizer   — AI-tell scrubber (finishing pass)${NC}"
     echo -e "${BLUE}━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━${NC}"
     echo ""
 
     verify_prerequisites
     install_copywriting_skill
+    install_humanizer_skill || true
     run_self_test
     print_summary
 }

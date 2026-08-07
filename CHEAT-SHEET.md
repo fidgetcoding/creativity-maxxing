@@ -291,6 +291,47 @@ Suspended automatically in regular chat by `/concise` (from `cli-maxxing`) — i
 
 ---
 
+## Humanizer
+
+`/humanizer` is the finishing pass. `/copywriting` writes the draft; `/humanizer` audits it against 33 named AI-writing patterns catalogued by Wikipedia's WikiProject AI Cleanup.
+
+```
+"/humanizer" then paste the text
+"Run humanizer on docs/about.md"
+"Strip the AI tells out of this — humanizer pass"
+```
+
+Three invocation modes:
+
+| Mode | Trigger | Output |
+|---|---|---|
+| Pasted text | You paste prose into chat | Draft rewrite, "still-AI" audit bullets, final rewrite |
+| File | You point at a file path | Rewrites the file in place, reports a summary. Prose only: code blocks, frontmatter, and link targets are untouched |
+| Embedded | Another skill or agent calls it mid-task | Final text only, no ceremony |
+
+What it catches that a plain "make this sound human" prompt misses:
+
+- Inline-header vertical lists (every bullet opening with a bolded label and a colon)
+- Tailing negations and negative parallelism: "no guessing", "not X, but Y"
+- Aphorism formulas: "X is the language of Y", "X becomes a trap"
+- Rule-of-three padding and false ranges ("from X to Y" where X and Y aren't on a scale)
+- Copula avoidance: "serves as", "stands as", "boasts a", instead of plain is/are/has
+- Persuasive authority tropes: "the real question is", "at its core", "fundamentally"
+- Manufactured punchlines and staccato drama
+- Em dashes and en dashes, banned outright in the final rewrite
+- Curly quotes, stray emoji, title-case headings
+
+Two rules worth knowing:
+
+1. **Order matters.** Draft with `/copywriting`, then run `/humanizer` on the result. Both at once produces mush, since one optimizes for persuasion and the other for un-detectability.
+2. **Give it a writing sample if you have one.** A sample of your own prose overrides the skill's built-in style rules, including the em-dash ban. Matching the author beats scrubbing the tell.
+
+It also documents what *not* to flag: perfect grammar, formal vocabulary, curly quotes on their own, a single em dash, one short emphatic sentence. Tells count in clusters.
+
+Source: `blader/humanizer`, installed by the copywriting module at pinned commit `523374d`. Bump `HUMANIZER_COMMIT` in `copywriting/install.sh` to update.
+
+---
+
 ## Workflow combos
 
 Common multi-tool patterns:
@@ -333,6 +374,7 @@ cbrain      # open the 2ndBrain vault context (requires 2ndBrain-mogging)
 | Video prompt skills | `~/.claude/skills/01-cinematic/` … `~/.claude/skills/15-real-estate/` |
 | Remotion skill | `~/.claude/skills/remotion-best-practices/` |
 | Copywriting skill | `~/.claude/skills/copywriting/` (SKILL.md + 19 references) |
+| Humanizer skill | `~/.claude/skills/humanizer/` (SKILL.md + agents + scripts, pinned @ `523374d`) |
 | Claude-watch skill | `~/.claude/skills/watch/` (SKILL.md + 11 scripts + hooks + slash command) |
 | Claude-watch config | `~/.config/watch/.env` (mode 0600) — optional API keys |
 | Claude-watch library | `~/watch/library/<slug>/` (notes.md + frames + transcript per video) |

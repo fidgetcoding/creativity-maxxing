@@ -59,6 +59,14 @@ assert_contains "$COPY_SH" 're:cp .*LOCAL_SRC' \
 # Self-test asserts SKILL.md + a sentinel reference.
 assert_contains "$COPY_SH" "re:TEST: copywriting SKILL.md" \
   "self-test asserts copywriting SKILL.md landed"
+assert_contains "$COPY_SH" "install_humanizer_skill" \
+  "copywriting/install.sh defines install_humanizer_skill"
+assert_contains "$COPY_SH" "523374dee72d67c7b2b5f858ea0094ffda49c3ac" \
+  "humanizer install is pinned to an audited commit SHA"
+assert_contains "$COPY_SH" 're:rm -rf "\$tmp/\.git"' \
+  "humanizer install strips .git before copying into ~/.claude/skills"
+assert_contains "$COPY_SH" "re:TEST: humanizer SKILL.md" \
+  "self-test asserts humanizer SKILL.md landed"
 assert_contains "$COPY_SH" "voice-library.md" \
   "self-test asserts voice-library.md (sentinel reference)"
 
@@ -116,6 +124,28 @@ exit 22
 SHIM
 chmod +x "$MOCK_BIN/curl"
 
+# Stub git so the humanizer step never touches the network. `clone` fabricates
+# a minimal upstream layout (root SKILL.md + agents/ + .git/ + .github/) and
+# `checkout` only succeeds on the exact pinned SHA, so a bad pin is caught.
+cat > "$MOCK_BIN/git" <<'SHIM'
+#!/usr/bin/env bash
+if [[ "${1:-}" == "clone" ]]; then
+  dest="${@: -1}"
+  mkdir -p "$dest/.git" "$dest/.github" "$dest/agents"
+  printf -- '---\nname: humanizer\ndescription: stub\n---\nbody\n' > "$dest/SKILL.md"
+  echo stub > "$dest/agents/openai.yaml"
+  echo stub > "$dest/.git/config"
+  echo stub > "$dest/.github/ci.yml"
+  exit 0
+fi
+if [[ "${1:-}" == "-C" && "${3:-}" == "checkout" ]]; then
+  [[ "${5:-}" == "523374dee72d67c7b2b5f858ea0094ffda49c3ac" ]] && exit 0
+  exit 1
+fi
+exit 0
+SHIM
+chmod +x "$MOCK_BIN/git"
+
 set +e
 INSTALL_OUT="$(PATH="$MOCK_BIN:$PATH" HOME="$FAKE_HOME" \
   bash "$COPY_SH" 2>&1)"
@@ -136,11 +166,29 @@ REF_COUNT="$(find "$SKILL_DIR/references" -type f -name '*.md' 2>/dev/null | wc 
 assert_eq "$REF_COUNT" "19" "all 19 reference files landed via local fallback"
 
 # Self-test output sanity.
-if echo "$INSTALL_OUT" | grep -q 'self-test: 2/2 passed'; then
-  _pass "self-test reports 2/2 passed"
+if echo "$INSTALL_OUT" | grep -q 'self-test: 4/4 passed'; then
+  _pass "self-test reports 4/4 passed"
 else
-  _fail "self-test did not report 2/2 passed"
+  _fail "self-test did not report 4/4 passed"
   printf '  saw: %s\n' "${INSTALL_OUT:0:600}" 1>&2
+fi
+
+# Humanizer payload landed from the pinned checkout, without VCS metadata.
+HUM_DIR="$FAKE_HOME/.claude/skills/humanizer"
+if [[ -f "$HUM_DIR/SKILL.md" ]]; then
+  _pass "humanizer SKILL.md landed at \$HOME/.claude/skills/humanizer/"
+else
+  _fail "humanizer SKILL.md missing"
+fi
+if [[ -f "$HUM_DIR/agents/openai.yaml" ]]; then
+  _pass "humanizer non-SKILL payload copied (agents/openai.yaml)"
+else
+  _fail "humanizer payload incomplete — agents/openai.yaml missing"
+fi
+if [[ ! -d "$HUM_DIR/.git" && ! -d "$HUM_DIR/.github" ]]; then
+  _pass "humanizer install carries no .git or .github metadata"
+else
+  _fail "humanizer install leaked VCS metadata into ~/.claude/skills"
 fi
 
 # Idempotency: re-run with the SAME sandbox HOME — should still exit 0 and
@@ -157,7 +205,46 @@ REF_COUNT_2="$(find "$SKILL_DIR/references" -type f -name '*.md' 2>/dev/null | w
 assert_eq "$REF_COUNT_2" "19" "reference count unchanged after re-run"
 
 # ---------------------------------------------------------------------------
-# Behavioral probe 2: prereq check fails without `claude` on PATH.
+# Behavioral probe 2: the humanizer clone fails (offline / repo unreachable).
+# The copywriting install must still complete and exit 0 — humanizer is a
+# soft-fail, not a gate.
+# ---------------------------------------------------------------------------
+FAKE_HOME_NOGIT="$TMPROOT/home-nogit"
+mkdir -p "$FAKE_HOME_NOGIT/.claude/skills"
+
+MOCK_BIN_NOGIT="$TMPROOT/mock-bin-nogit"
+mkdir -p "$MOCK_BIN_NOGIT"
+cp "$MOCK_BIN/claude" "$MOCK_BIN_NOGIT/claude"
+cp "$MOCK_BIN/curl" "$MOCK_BIN_NOGIT/curl"
+cat > "$MOCK_BIN_NOGIT/git" <<'SHIM'
+#!/usr/bin/env bash
+exit 128
+SHIM
+chmod +x "$MOCK_BIN_NOGIT/git"
+
+set +e
+NOGIT_OUT="$(PATH="$MOCK_BIN_NOGIT:$PATH" HOME="$FAKE_HOME_NOGIT" \
+  bash "$COPY_SH" 2>&1)"
+NOGIT_RC=$?
+set -e 2>/dev/null || true
+
+assert_eq "$NOGIT_RC" "0" "copywriting/install.sh exits 0 when the humanizer clone fails"
+
+if [[ -f "$FAKE_HOME_NOGIT/.claude/skills/copywriting/SKILL.md" ]]; then
+  _pass "copywriting skill still installs when humanizer is unreachable"
+else
+  _fail "copywriting skill missing after a failed humanizer clone"
+fi
+
+if echo "$NOGIT_OUT" | grep -q 'clone failed'; then
+  _pass "failed humanizer clone soft-fails with a clone-failed message"
+else
+  _fail "failed humanizer clone did not surface a clone-failed message"
+  printf '  saw: %s\n' "${NOGIT_OUT:0:400}" 1>&2
+fi
+
+# ---------------------------------------------------------------------------
+# Behavioral probe 3: prereq check fails without `claude` on PATH.
 # ---------------------------------------------------------------------------
 PATH_NO_CLAUDE="$TMPROOT/path-no-claude"
 mkdir -p "$PATH_NO_CLAUDE"
