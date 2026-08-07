@@ -145,6 +145,110 @@ install_remotion_skills() {
 }
 
 # -----------------------------------------------------------------------------
+# Install /video-shotcraft — product-video shot design
+# Upstream: Vincentwei1021/video-shotcraft (Apache-2.0)
+#
+# A shot-card library for PRODUCT video: framing, camera move, lighting and
+# pacing per shot. Orthogonal to the talking-head workflow /watch supports —
+# this one is for the thing on the table, not the person at the desk.
+#
+# Heads-up worth setting expectations on: the ~104 shot cards are written in
+# Chinese. The SKILL.md scaffolding is English and Claude reads the cards
+# fine, so the skill works end to end — but if you open the reference files
+# expecting English prose, you won't find it.
+# -----------------------------------------------------------------------------
+install_video_shotcraft() {
+    info "Installing /video-shotcraft skill..."
+
+    if [ -d "$HOME/.claude/skills/video-shotcraft" ] || [ -L "$HOME/.claude/skills/video-shotcraft" ]; then
+        success "/video-shotcraft already installed"
+        return
+    fi
+
+    # Pinned to an audited commit — bump SHOTCRAFT_COMMIT to update.
+    local SHOTCRAFT_COMMIT="0022ec45d28800cecb5b16624a3179093c93f4e9"
+    install_skill_pack_pinned "https://github.com/Vincentwei1021/video-shotcraft" \
+        "$SHOTCRAFT_COMMIT" "/video-shotcraft" || true
+
+    if [ -d "$HOME/.claude/skills/video-shotcraft" ]; then
+        success "/video-shotcraft installed (shot cards are Chinese; scaffolding is English)"
+    else
+        soft_fail "/video-shotcraft installation could not be verified"
+    fi
+}
+
+# -----------------------------------------------------------------------------
+# Install the AI film pipeline skills (5 skills)
+# Upstream: A0339x/ai-film-pipeline (MIT)
+#
+# Five skills that chain into one narrative-video workflow:
+#   ai-film-director      end-to-end director pass over a film idea
+#   story-bible-builder   canon / character / world consistency doc
+#   cinema-worldbuilder   world and setting design
+#   banana-pro-director   shot + prompt direction
+#   video-qa              QA pass on generated footage
+#
+# Provenance, stated plainly because it is weaker than the rest of this repo's
+# dependencies: the upstream is a small personal collection (single-digit
+# stars, no forks, first published 2026-05-14). Its LICENSE is MIT and does
+# grant redistribution, but GitHub reports NOASSERTION because of a custom
+# copyright preamble — two of the five skills (banana-pro-director,
+# cinema-worldbuilder) originate with Joey of CTRL: Hunters and are included
+# on the strength of a spoken "take them, use them, modify them" grant made
+# in a YouTube video, not a written license from him.
+#
+# That is a thinner chain than Apache-2.0 or a real MIT header, which is
+# exactly why this is pinned. If any of it ever gets pulled, the pin keeps
+# your install reproducible and the failure loud instead of silent.
+# -----------------------------------------------------------------------------
+install_ai_film_skills() {
+    info "Installing AI film pipeline skills (5)..."
+
+    if [ -d "$HOME/.claude/skills/ai-film-director" ] || [ -L "$HOME/.claude/skills/ai-film-director" ]; then
+        success "AI film pipeline skills already installed"
+        return
+    fi
+
+    # Pinned to an audited commit — bump AIFILM_COMMIT to update.
+    local AIFILM_COMMIT="5314221fe0c886a2fb76470bb170cd0267174563"
+    install_skill_pack_pinned "https://github.com/A0339x/ai-film-pipeline" \
+        "$AIFILM_COMMIT" "AI film pipeline skills" || true
+
+    # Verify against the skills' `name:` FRONTMATTER, not their directory
+    # names — upstream's two Joey-derived skills carry a version suffix in
+    # frontmatter that their folders don't ("banana-pro-director/" declares
+    # name: banana-pro-director-3.0). install_skill_pack_pinned installs by
+    # frontmatter name, which is also what you type as the slash command, so
+    # these are the real installed paths.
+    # Array, not a space-separated string + unquoted word splitting. The rest
+    # of this file already uses "${SKILL_NAMES[@]}" for exactly this reason:
+    # it does not care what IFS happens to be when the function runs.
+    local expected=(
+        ai-film-director
+        story-bible-builder
+        cinema-worldbuilder-pro-30
+        banana-pro-director-3.0
+        video-qa
+    )
+    local found=0 s
+    for s in "${expected[@]}"; do
+        if [ -d "$HOME/.claude/skills/$s" ]; then
+            found=$((found + 1))
+        fi
+    done
+
+    if [ "$found" -eq "${#expected[@]}" ]; then
+        success "AI film pipeline skills installed ($found/${#expected[@]})"
+        info "  slash commands: /ai-film-director /story-bible-builder /video-qa"
+        info "                  /cinema-worldbuilder-pro-30 /banana-pro-director-3.0"
+    elif [ "$found" -gt 0 ]; then
+        warn "AI film pipeline: only $found/${#expected[@]} skills landed — upstream layout may have changed"
+    else
+        soft_fail "AI film pipeline skills installation could not be verified"
+    fi
+}
+
+# -----------------------------------------------------------------------------
 # Install Higgsfield / Seedance 2.0 prompt skills (15 skills)
 # Upstream: beshuaxian/higgsfield-seedance2-jineng
 # We clone the repo once into a temp dir and copy each skills/<n>/SKILL.md to
@@ -623,7 +727,7 @@ main() {
     echo ""
     echo -e "${BLUE}━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━${NC}"
     echo -e "${BLUE}  Media Module${NC}"
-    echo -e "${BLUE}  Remotion + Higgsfield + Transcription • macOS + Linux${NC}"
+    echo -e "${BLUE}  Remotion + Higgsfield + Shotcraft + Film + Transcription${NC}"
     echo -e "${BLUE}━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━${NC}"
     echo ""
 
@@ -632,6 +736,8 @@ main() {
     preflight_npm_cache_ownership
     install_remotion_skills
     install_higgsfield_skills
+    install_video_shotcraft
+    install_ai_film_skills
     install_youtube_transcript
     install_ytdlp_cli
     install_ytdlp_mcp

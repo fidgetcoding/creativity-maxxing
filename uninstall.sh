@@ -191,6 +191,50 @@ remove_remotion_skills() {
 }
 
 # -----------------------------------------------------------------------------
+# Remove /video-shotcraft
+# -----------------------------------------------------------------------------
+remove_video_shotcraft() {
+    local SKILL_DIR="$HOME/.claude/skills/video-shotcraft"
+    if [ -d "$SKILL_DIR" ] || [ -L "$SKILL_DIR" ]; then
+        rm -rf "$SKILL_DIR"
+        removed_one "Removed /video-shotcraft skill"
+    else
+        skipped_one "/video-shotcraft skill not present"
+    fi
+}
+
+# -----------------------------------------------------------------------------
+# Remove the AI film pipeline skills
+#
+# These are keyed by the skills' `name:` FRONTMATTER, which is what the
+# installer writes and what you type as the slash command. Two of them carry a
+# version suffix upstream that their source folders don't, so removing by
+# folder name would silently miss them.
+# -----------------------------------------------------------------------------
+remove_ai_film_skills() {
+    local skills=(
+        "ai-film-director"
+        "story-bible-builder"
+        "cinema-worldbuilder-pro-30"
+        "banana-pro-director-3.0"
+        "video-qa"
+    )
+    local r=0 s=0
+    for sk in "${skills[@]}"; do
+        local dir="$HOME/.claude/skills/$sk"
+        if [ -d "$dir" ] || [ -L "$dir" ]; then
+            rm -rf "$dir"
+            r=$((r + 1))
+        else
+            s=$((s + 1))
+        fi
+    done
+    REMOVED=$((REMOVED + r))
+    SKIPPED=$((SKIPPED + s))
+    success "AI film pipeline skills: removed $r, skipped $s (already absent)"
+}
+
+# -----------------------------------------------------------------------------
 # Remove YouTube Transcript MCP
 # -----------------------------------------------------------------------------
 remove_youtube_transcript_mcp() {
@@ -368,6 +412,8 @@ main() {
     remove_playwright_mcp
     remove_higgsfield_skills
     remove_remotion_skills
+    remove_video_shotcraft
+    remove_ai_film_skills
     remove_youtube_transcript_mcp
     remove_ytdlp_mcp
     remove_ytdlp_cli
