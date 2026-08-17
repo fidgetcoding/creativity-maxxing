@@ -36,7 +36,7 @@ Proper nouns spelled the same every time. Numbers agree with earlier references.
 
 **Common bugs:**
 - Person's name misspelled across paragraphs ("Marko" once, "Marco" later).
-- Brand-name variants ("The Beard Club" / "Beard Club" — pick one canonical form per doc).
+- Brand-name variants ("The Widget Co" / "Widget Co" — pick one canonical form per doc).
 - Number mismatch ($80M revenue in para 2, $85M in para 4 — explain or fix).
 - Date mismatch (5-month guarantee → six-month program).
 
